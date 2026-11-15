@@ -1,0 +1,21 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import { company } from '../data/company';
+---
+<Base title="Terms" description="Terms for using the Skylark Express website, and where to find the conditions of carriage that apply to a booking.">
+  <PageHero eyebrow="Terms" title="Website terms" lede="These terms cover the use of this website. Carriage of goods is governed by the conditions printed on your consignment note and in your contract." />
+  <section class="section-tight" style="padding-top:0"><div class="wrap prose">
+    <h2 class="display h-2">Using this website</h2>
+    <p>Information on this site describes the services of {company.legalName} in general terms. A quote request or message is an enquiry reviewed by our team; it is not a booking and does not create a contract of carriage.</p>
+    <h2 class="display h-2">Tracking and serviceability results</h2>
+    <p>Tracking shows the scans recorded for a docket or air waybill. A PIN-code result is a first answer that is confirmed for the specific shipment and cargo type by our team. Example records on this site are labelled and use fictitious data.</p>
+    <h2 class="display h-2">Company-reported figures</h2>
+    <p>Figures such as warehouse count, warehousing area, PIN codes and states are published by the company. Individual lanes and cargo types need serviceability confirmation.</p>
+    <h2 class="display h-2">Conditions of carriage</h2>
+    <div class="notice warn"><p class="notice-h">Awaiting company-approved text.</p><p>The approved conditions of carriage, including exclusions and limits of liability, are to be supplied by {company.legalName} and published here before launch. Until then, the conditions printed on your consignment note and any signed contract apply. Ask for a copy at <a href={`mailto:${company.email}`}>{company.email}</a>.</p></div>
+    <h2 class="display h-2">Contact</h2>
+    <p><a href="/contact">Contact the team</a> with any question about these terms.</p>
+  </div></section>
+</Base>
+<style>.prose h2{margin-top:1.6em}</style>

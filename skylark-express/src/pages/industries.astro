@@ -1,0 +1,54 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Pic from '../components/Pic.astro';
+import CTA from '../components/CTA.astro';
+import { industries } from '../data/industries';
+---
+<Base title="Industries" description="How Skylark Express handles healthcare and pharma, IT and electronics, FMCG and retail, chemicals, automation and energy, and documented cargo.">
+  <PageHero eyebrow="Industries" title="Every sector asks a different question at the handover." lede="Six sectors, the cargo concerns that come with each, and the services that answer them.">
+    <nav aria-label="Sectors on this page"><ul class="ind-nav" role="list">{industries.map((i) => <li><a href={`#${i.id}`}>{i.name}</a></li>)}</ul></nav>
+  </PageHero>
+  {industries.map((ind, n) => (
+    <section class:list={['section-tight rule-top ind', { flip: n % 2 === 1, big: !!ind.expanded }]} id={ind.id} aria-labelledby={`${ind.id}-h`}>
+      <div class="wrap grid">
+        <div class="ind-pic" data-reveal="mask"><Pic name={ind.image} alt={ind.imageAlt} ratio={ind.expanded ? 16 / 10 : 3 / 2} widths={[480, 800, 1200]} sizes="(min-width:900px) 46vw, 92vw" /></div>
+        <div class="ind-copy stack" style="--s:16px">
+          <p class="mono small muted">{String(n + 1).padStart(2, '0')} / 06</p>
+          <h2 class="display h-1" id={`${ind.id}-h`}>{ind.name}</h2>
+          <p class="lede"><strong>{ind.concern}</strong></p>
+          {ind.paragraphs.map((p) => <p>{p}</p>)}
+          {ind.expanded && (
+            <div class="ind-exp">
+              <h3 class="display h-3">{ind.expanded.heading}</h3>
+              <ol role="list">{ind.expanded.items.map((it, k) => <li data-reveal style={`--d:${k * 70}ms`}><span class="mono small">{String(k + 1).padStart(2, '0')}</span><div><strong>{it.title}</strong><p class="muted">{it.text}</p></div></li>)}</ol>
+              <p class="small muted">Temperature-controlled arrangements depend on the lane and the product. They are confirmed for each shipment, in writing, before booking.</p>
+            </div>
+          )}
+          <div class="ind-next">
+            <p class="small"><strong>Next step.</strong> {ind.ask}</p>
+            <p class="cluster"><a class="btn btn-ink" href={`/quote?service=${ind.links[0].slug}&notes=`}>Send an enquiry <span class="arr" aria-hidden="true">→</span></a>
+              {ind.links.map((l) => <a class="link-arrow" href={`/services/${l.slug}`}>{l.label} <span class="arr" aria-hidden="true">→</span></a>)}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  ))}
+  <CTA />
+</Base>
+<style>
+  .ind-nav{display:flex;flex-wrap:wrap;gap:8px}
+  .ind-nav a{display:inline-flex;align-items:center;min-height:44px;padding:6px 14px;border:1.5px solid var(--rule-strong);border-radius:999px;text-decoration:none;color:var(--ink);font-weight:500;background:#fff}
+  .ind-nav a:hover{border-color:var(--ink);background:var(--citron)}
+  .ind-pic,.ind-copy{grid-column:1/-1}
+  .ind-copy{margin-top:20px}
+  .ind-pic :global(img){width:100%}
+  .ind-exp{border:1.5px solid var(--ink);background:#fff;padding:20px;display:grid;gap:12px}
+  .ind-exp ol{display:grid;gap:0}
+  .ind-exp li{display:grid;grid-template-columns:2.2rem 1fr;gap:6px;padding:12px 0;border-top:1px solid var(--rule)}
+  .ind-next{border-top:1px solid var(--rule-strong);padding-top:14px;display:grid;gap:10px}
+  @media (min-width:900px){
+    .ind-pic{grid-column:1/7;position:sticky;top:calc(var(--header-h) + 24px);align-self:start}.ind-copy{grid-column:8/13;margin-top:0}
+    .ind.flip .ind-pic{grid-column:7/13;order:2}.ind.flip .ind-copy{grid-column:1/6;order:1}
+  }
+</style>

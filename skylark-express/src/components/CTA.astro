@@ -1,0 +1,10 @@
+---
+const { title = 'Tell us what needs to move.', text = 'Share the cargo, the pickup point and the destination. Our team will help plan the movement.', href = '/quote', label = 'Get a freight quote' } = Astro.props;
+---
+<section class="section-tight dark cta">
+  <div class="wrap cta-in">
+    <div class="stack" style="--s:10px"><h2 class="display h-1">{title}</h2><p class="lede">{text}</p></div>
+    <p class="cluster"><a class="btn btn-primary" href={href}>{label} <span class="arr" aria-hidden="true">→</span></a><a class="btn btn-ghost" href="/contact">Contact the team</a></p>
+  </div>
+</section>
+<style>.cta-in{display:grid;gap:24px}@media (min-width:900px){.cta-in{grid-template-columns:1fr auto;align-items:end}}</style>

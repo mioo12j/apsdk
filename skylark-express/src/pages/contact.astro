@@ -1,0 +1,122 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import { company } from '../data/company';
+import { offices, telHref, mapsHref } from '../data/offices';
+import { integrations } from '../config/integrations';
+const mode = integrations.forms.mode;
+const two = offices.filter((o) => o.kind === 'hq' || o.kind === 'registered');
+const topics = [
+  { id: 'sales', label: 'Sales enquiry', to: company.email, blurb: 'A new movement, a contract or a service question.' },
+  { id: 'shipment', label: 'Shipment support', to: company.email, blurb: 'A delay, a delivery question or a proof of delivery.' },
+  { id: 'branch', label: 'Branch details or office visit', to: company.email, blurb: 'Find the branch for a city, or arrange a visit.' },
+  { id: 'integration', label: 'Technology and integration', to: company.email, blurb: 'API, ERP integration and reporting.' },
+  { id: 'careers', label: 'Careers', to: company.careersEmail, blurb: 'Applications and questions about roles.' },
+];
+---
+<Base title="Contact" description="Contact Skylark Express for sales enquiries, shipment support, careers and office visits. Phones, email, hours and both principal offices.">
+  <PageHero eyebrow="Contact" title="Reach the right team first time." lede={`Call centre hours are ${company.hours.display}. ${company.responseTarget}`} />
+  <section class="section-tight" style="padding-top:0">
+    <div class="wrap grid">
+      <div class="ct-main">
+        <ul class="ct-topics" role="list">
+          <li><h2 class="display h-3">Sales enquiries</h2><p>For a price or a plan, the <a href="/quote">quote form</a> gets the details to sales fastest.</p></li>
+          <li><h2 class="display h-3">Shipment support</h2><p>Have the docket or AWB number ready. <a href="/track">Track it first</a>, then call or use the form below.</p></li>
+          <li><h2 class="display h-3">Careers</h2><p>Write to <a href={`mailto:${company.careersEmail}`}>{company.careersEmail}</a> or see <a href="/careers">open roles</a>.</p></li>
+          <li><h2 class="display h-3">Office visits</h2><p>Both principal offices are listed here. For any other city, use the <a href="/network">full directory</a>.</p></li>
+        </ul>
+        <form class="ct-form" data-contact data-mode={mode} novalidate>
+          <h2 class="display h-2">Send a message</h2>
+          {mode === 'offline' && <p class="notice">This form prepares an email in your own mail app, addressed to the team you choose. Nothing is sent until you press send there.</p>}
+          {mode === 'test' && <p class="notice warn"><strong>Test environment.</strong> Messages go to a local test API. Nothing reaches Skylark Express.</p>}
+          <div class="notice bad" role="alert" data-c-summary hidden tabindex="-1"></div>
+          <div class="field"><label for="c-topic">What is this about?</label>
+            <select class="input" id="c-topic" name="topic">{topics.map((t) => <option value={t.id} data-to={t.to}>{t.label}</option>)}</select>
+            <p class="hint" data-c-to>Goes to {company.email}</p></div>
+          <div class="field" data-c-docket hidden><label for="c-docket">Docket or AWB number <span class="opt">(optional)</span></label><input class="input mono" id="c-docket" name="docket" autocomplete="off" maxlength="80" /></div>
+          <div class="field" data-c-city hidden><label for="c-city">City or PIN code <span class="opt">(optional)</span></label><input class="input" id="c-city" name="city" autocomplete="off" maxlength="80" /></div>
+          <div class="field"><label for="c-msg">Your message</label><textarea class="input" id="c-msg" name="message" required maxlength="2000"></textarea><p class="err" hidden></p></div>
+          <div class="ct-two">
+            <div class="field"><label for="c-name">Your name</label><input class="input" id="c-name" name="name" autocomplete="name" required maxlength="80" /><p class="err" hidden></p></div>
+            <div class="field"><label for="c-reach">Phone or email</label><input class="input" id="c-reach" name="reach" autocomplete="email" required maxlength="120" /><p class="err" hidden></p></div>
+          </div>
+          <button class="btn btn-primary" type="submit" data-c-submit>{mode === 'offline' ? 'Open email draft' : 'Send message'}</button>
+          <div role="status" aria-live="polite" data-c-status></div>
+        </form>
+        <div class="ct-done" data-c-done hidden tabindex="-1"></div>
+      </div>
+      <aside class="ct-side">
+        <div class="ct-box dark">
+          <h2 class="display h-2">Call centre</h2>
+          <ul role="list">{company.phones.map((p) => <li><a class="ct-tel" href={`tel:${p.tel}`}>{p.display}</a></li>)}</ul>
+          <p>{company.hours.display}</p>
+          <p><a href={`mailto:${company.email}`}>{company.email}</a></p>
+          <p class="small muted">If an online tool is unavailable, either number reaches the team directly.</p>
+        </div>
+        {two.map((o) => (
+          <article class="office-card">
+            <p class:list={['tag', { hq: o.kind === 'hq' }]}>{o.typeLabel}</p>
+            <h2 class="display h-3">{o.label}</h2>
+            <p class="addr">{o.address}</p>
+            <p class="human"><a class="btn btn-ink" href={telHref(o.phone!)}>Call {o.phone}</a><a href={mapsHref(o.address!)} target="_blank" rel="noopener">Directions<span class="sr-only"> to {o.label} (opens a map in a new tab)</span></a></p>
+          </article>
+        ))}
+        <p><a class="link-arrow" href="/network">Open the full directory <span class="arr" aria-hidden="true">→</span></a></p>
+      </aside>
+    </div>
+  </section>
+  <script>
+    import { cfg, api, esc, humanHTML } from '../scripts/config';
+    const f = document.querySelector<HTMLFormElement>('[data-contact]')!, done = document.querySelector<HTMLElement>('[data-c-done]')!, sum = f.querySelector<HTMLElement>('[data-c-summary]')!;
+    const g = (n: string) => f.elements.namedItem(n) as HTMLInputElement, topic = g('topic') as any as HTMLSelectElement, btn = f.querySelector<HTMLButtonElement>('[data-c-submit]')!;
+    const qp = new URLSearchParams(location.search);
+    if (qp.get('topic') && [...topic.options].some((o) => o.value === qp.get('topic'))) topic.value = qp.get('topic')!;
+    if (qp.get('docket')) g('docket').value = qp.get('docket')!.slice(0, 80);
+    if (qp.get('city') || qp.get('pin')) g('city').value = (qp.get('city') || qp.get('pin'))!.slice(0, 80);
+    if (qp.get('need') === 'pod') g('message').value = 'Please send the proof of delivery for this docket.';
+    if (qp.get('pin') && !g('message').value) g('message').value = `Please confirm whether you serve PIN code ${qp.get('pin')!.slice(0, 6)}.`;
+    if (qp.get('city') && !g('message').value) g('message').value = `Please share the branch details for ${qp.get('city')!.slice(0, 60)}.`;
+    if ([...qp.keys()].length) history.replaceState(null, '', '/contact'); // identifiers stay out of the URL
+    const sync = () => { const t = topic.value; f.querySelector<HTMLElement>('[data-c-docket]')!.hidden = t !== 'shipment'; f.querySelector<HTMLElement>('[data-c-city]')!.hidden = !['branch', 'sales'].includes(t); f.querySelector('[data-c-to]')!.textContent = 'Goes to ' + topic.selectedOptions[0].dataset.to; btn.textContent = (cfg.forms.mode === 'offline' || t === 'careers') ? 'Open email draft' : 'Send message'; };
+    topic.addEventListener('change', sync); sync();
+    const setErr = (n: string, m: string) => { const i = g(n), e = i.closest('.field')!.querySelector<HTMLElement>('.err')!; e.textContent = m; e.hidden = !m; m ? i.setAttribute('aria-invalid', 'true') : i.removeAttribute('aria-invalid'); };
+    let sending = false; const token = () => crypto.randomUUID?.() || String(Date.now()); let key = token();
+    f.addEventListener('submit', async (e) => {
+      e.preventDefault(); const errs: [string, string][] = []; const reach = g('reach').value.trim();
+      if (g('message').value.trim().length < 5) errs.push(['message', 'Write a short message so we know how to help.']);
+      if (g('name').value.trim().length < 2) errs.push(['name', 'Enter your name.']);
+      if (!(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(reach) || reach.replace(/\D/g, '').length >= 10)) errs.push(['reach', 'Enter a phone number with at least 10 digits, or an email address.']);
+      ['message', 'name', 'reach'].forEach((n) => setErr(n, errs.find(([k]) => k === n)?.[1] || ''));
+      if (errs.length) { g(errs[0][0]).focus(); return; }
+      if (sending) return;
+      const t = topic.selectedOptions[0], to = t.dataset.to!, d = { topic: topic.value, topicLabel: t.text, docket: g('docket').value.trim(), city: g('city').value.trim(), message: g('message').value.trim(), name: g('name').value.trim(), reach };
+      const txt = [`${d.topicLabel}`, d.docket && `Docket/AWB: ${d.docket}`, d.city && `City/PIN: ${d.city}`, '', d.message, '', `From: ${d.name}`, `Reply to: ${d.reach}`].filter((x) => x !== '' ? x : true).filter((x) => x !== false && x !== undefined).join('\n');
+      if (cfg.forms.mode === 'offline' || d.topic === 'careers') {
+        const href = `mailto:${to}?subject=${encodeURIComponent(d.topicLabel + (d.docket ? ' – ' + d.docket : ''))}&body=${encodeURIComponent(txt)}`;
+        f.hidden = true; done.hidden = false; done.innerHTML = `<h2 class="display h-2">Your email draft is ready</h2><p><strong>Nothing has been sent yet.</strong> A draft addressed to <a href="mailto:${to}">${to}</a> should now be open in your mail app. Press send there.</p><pre>${esc(txt)}</pre><p class="cluster"><a class="btn btn-primary" href="${href}">Open email draft</a><button class="btn btn-ghost" type="button" data-edit>Edit message</button></p>${humanHTML('Or call:')}`;
+        done.querySelector('[data-edit]')!.addEventListener('click', () => { done.hidden = true; f.hidden = false; g('message').focus(); }); done.focus(); location.href = href; return;
+      }
+      sending = true; btn.disabled = true; btn.textContent = 'Sending…'; sum.hidden = true; let ok = false, ref = '', test = false;
+      try { const r = await api(cfg.forms.endpoint, { method: 'POST', body: JSON.stringify({ type: 'contact', idempotencyKey: key, ...d }) }, 15000); ok = r.ok && !!r.body?.reference; ref = r.body?.reference || ''; test = !!r.body?.test; } catch {}
+      sending = false; btn.disabled = false; sync();
+      if (!ok) { sum.innerHTML = `<p class="notice-h">Your message was not sent.</p><p>Our system did not accept it just now. Your message is still here. Try again, or contact the team directly.</p>${humanHTML('')}`; sum.hidden = false; sum.focus(); return; }
+      key = token(); f.hidden = true; done.hidden = false;
+      done.innerHTML = `<h2 class="display h-2">Message received</h2>${test ? '<p class="notice warn"><strong>Test environment.</strong> No message was sent to Skylark Express.</p>' : ''}<p>Your ${esc(d.topicLabel.toLowerCase())} has been accepted by our system and passed to the team${d.docket ? ` with docket <span class="mono">${esc(d.docket)}</span>` : ''}. We aim to reply within one business day.</p><p>Reference: <strong class="mono">${esc(ref)}</strong></p>${humanHTML('Urgent?')}`; done.focus();
+    });
+  </script>
+</Base>
+<style>
+  .ct-main,.ct-side{grid-column:1/-1}
+  .ct-main{display:grid;gap:32px;align-content:start}
+  .ct-topics{display:grid;gap:0;border-top:1.5px solid var(--ink)}
+  .ct-topics li{padding:16px 0;border-bottom:1px solid var(--rule);display:grid;gap:4px}
+  .ct-form,.ct-done{background:#fff;border:1.5px solid var(--ink);padding:clamp(16px,3vw,28px);display:grid;gap:18px}
+  .ct-done :global(pre){white-space:pre-wrap;font-family:var(--mono);font-size:.875rem;background:var(--paper);border:1px solid var(--rule-strong);padding:14px}
+  .ct-two{display:grid;gap:18px}
+  .ct-form .btn{justify-self:start}
+  .ct-side{display:grid;gap:16px;align-content:start;margin-top:32px}
+  .ct-box{padding:24px;display:grid;gap:10px}.ct-box ul{list-style:none;padding:0;margin:0}
+  .ct-tel{font:700 clamp(1.75rem,1.4rem + 1.5vw,2.25rem)/1.1 var(--display);color:var(--paper)!important;min-height:48px;display:inline-flex;align-items:center}
+  @media (min-width:640px){.ct-two{grid-template-columns:1fr 1fr}.ct-topics{grid-template-columns:1fr 1fr;column-gap:24px}}
+  @media (min-width:1000px){.ct-main{grid-column:1/8}.ct-side{grid-column:9/13;margin-top:0}}
+</style>

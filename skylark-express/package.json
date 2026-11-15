@@ -1,0 +1,28 @@
+{
+  "name": "skylark-express-site",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "node server/preview.mjs",
+    "map": "node scripts/build-map.mjs",
+    "test": "node tests/run.mjs",
+    "build:preview": "PUBLIC_SITE_MODE=preview astro build",
+    "film": "node scripts/film-graphics.mjs && python3 scripts/build-film.py"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.1.0",
+    "@fontsource/barlow-condensed": "^5.1.0",
+    "astro": "^5.0.0"
+  },
+  "devDependencies": {
+    "axe-core": "^4.14.0",
+    "d3-geo": "^3.1.1",
+    "mapshaper": "^0.6.102",
+    "shapefile": "^0.6.6",
+    "sharp": "^0.33.5",
+    "typescript": "^5.6.0"
+  }
+}

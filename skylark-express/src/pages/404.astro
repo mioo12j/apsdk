@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+import TrackForm from '../components/TrackForm.astro';
+import Human from '../components/Human.astro';
+---
+<Base title="Page not found" description="This page could not be found. Track a shipment, see our services or contact the team." noindex>
+  <section class="page-hero dark" style="min-height:70vh;display:grid;align-items:center">
+    <div class="wrap stack" style="--s:22px;max-width:820px">
+      <p class="mono" style="color:var(--citron)">404 · No scan at this address</p>
+      <h1 class="display h-page">This page did not arrive.</h1>
+      <p class="lede">The link may be old, or the address may have a typing error. These three will get you moving again.</p>
+      <p class="cluster"><a class="btn btn-primary" href="/track">Track</a><a class="btn btn-ghost" href="/services">Services</a><a class="btn btn-ghost" href="/contact">Contact</a></p>
+      <div style="background:var(--petrol);padding:20px;border-radius:4px;max-width:560px"><TrackForm id="nf-track" compact /></div>
+      <Human />
+    </div>
+  </section>
+</Base>

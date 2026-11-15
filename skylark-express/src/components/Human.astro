@@ -1,0 +1,6 @@
+---
+// The human fallback: phone and email, shown next to every failure state.
+import { company } from '../data/company';
+const { lead = 'Speak to our team:' } = Astro.props;
+---
+<p class="human"><span>{lead}</span>{company.phones.map((p) => <a href={`tel:${p.tel}`}>{p.display}</a>)}<a href={`mailto:${company.email}`}>{company.email}</a><span class="small muted">{company.hours.display}</span></p>

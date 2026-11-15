@@ -1,0 +1,94 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Pic from '../components/Pic.astro';
+import Founders from '../components/Founders.astro';
+import FilmDialog from '../components/FilmDialog.astro';
+import CTA from '../components/CTA.astro';
+import { company, timeline, values, figures } from '../data/company';
+const practice = [
+  ['Driver training', 'Drivers are trained on securing loads, defensive driving and how to complete a handover record.'],
+  ['Route planning', 'Routes are planned to avoid empty running and unnecessary distance, which saves fuel and time.'],
+  ['Vehicle health checks', 'Vehicles are checked before dispatch. A vehicle that fails a check does not take the load.'],
+  ['Emissions checks', 'Vehicles are kept within their pollution-under-control certification.'],
+  ['Recycling', 'Pallets, cartons and stretch film are reused or sent for recycling where they can be.'],
+  ['Electric vehicles', 'EV adoption for short local movements is an area the company has explored. Any target will be published with a dated announcement.'],
+];
+---
+<Base title="About Skylark Express" description="Skylark Express was started in 1993 by brothers Rakesh Yadav and Naveen Yadav. Read the history, meet the leadership and see how the story shapes each handover.">
+  <PageHero eyebrow="About" title="Founder-led since the first consignment." lede="Skylark Express (Delhi) Pvt. Ltd. is an integrated, pan-India logistics business run from Gurugram. It began in 1993 with two brothers, no office and no fleet." />
+  <section class="section petrol about-lead" aria-labelledby="lead-h">
+    <div class="wrap grid">
+      <div class="al-copy stack" style="--s:18px">
+        <p class="eyebrow" data-reveal>Leadership</p>
+        <h2 class="display h-1" id="lead-h" data-reveal>Two brothers. Two clear responsibilities.</h2>
+        <p class="lede" data-reveal>Rakesh Yadav and Naveen Yadav took the first bookings and made the first deliveries personally. They still lead the business together, with the work divided plainly between them.</p>
+        <p data-reveal><button class="play-film" type="button" data-film-open><span class="pf-ic" aria-hidden="true"><svg width="12" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z" fill="currentColor"/></svg></span>Play film · 42 seconds</button></p>
+      </div>
+      <div class="al-pics"><Founders size="about" /></div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="tl-h">
+    <div class="wrap grid">
+      <h2 class="display h-1 tl-h" id="tl-h">From 1993 to today</h2>
+      <ol class="tl" role="list">{timeline.map((t, i) => <li data-reveal style={`--d:${i * 80}ms`}><span class="display tl-era">{t.era}</span><div><h3 class="display h-3">{t.title}</h3><p>{t.body}</p></div></li>)}</ol>
+    </div>
+  </section>
+  <section class="section-tight dark" aria-labelledby="mis-h">
+    <div class="wrap grid">
+      <div class="mis-l stack" style="--s:16px"><p class="eyebrow">Mission</p><h2 class="display h-1" id="mis-h">Move every consignment as if we had booked it ourselves.</h2>
+        <p class="lede">That means cost-conscious planning, safe handling and telling the customer what is happening, including when the news is a delay. The brand line says it shortly: {company.brandLine}</p></div>
+      <ul class="vals" role="list">{values.map((v) => <li data-reveal><h3 class="display h-3">{v.name}</h3><p class="muted">{v.body}</p></li>)}</ul>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="pr-h">
+    <div class="wrap grid">
+      <div class="pr-pic" data-reveal="mask"><Pic name="team" alt="A shift lead briefs dock staff in Skylark jackets on the warehouse floor in the morning" ratio={4 / 3} widths={[480, 800, 1200]} sizes="(min-width:900px) 46vw, 92vw" /></div>
+      <div class="pr-copy stack" style="--s:16px">
+        <p class="eyebrow">What the story means for your shipment</p>
+        <h2 class="display h-1" id="pr-h">An identified pickup. A documented handover.</h2>
+        <p>The founders knew every customer because they met each one at the counter. The business is larger now, so the same assurance is built into the process: the person collecting your consignment is identified to your dispatch team, each piece is matched to the docket, and every change of custody is scanned and recorded until the consignee signs.</p>
+        <p><a class="link-arrow" href="/technology">How scans and proof of delivery work <span class="arr" aria-hidden="true">→</span></a></p>
+      </div>
+    </div>
+  </section>
+  <section class="section-tight rule-top" aria-labelledby="ops-h">
+    <div class="wrap grid">
+      <div class="ops-h stack" style="--s:12px"><h2 class="display h-2" id="ops-h">Responsible operations, daily</h2><p class="muted">Small routines that add up across a network.</p></div>
+      <dl class="ops">{practice.map(([k, v]) => <div><dt class="display h-3">{k}</dt><dd>{v}</dd></div>)}</dl>
+    </div>
+  </section>
+  <section class="section-tight rule-top" aria-labelledby="sc-h">
+    <div class="wrap">
+      <h2 class="display h-2" id="sc-h">Company-reported scale</h2>
+      <dl class="scale">{[figures.warehouses, figures.warehouseArea, figures.pinCodes, figures.states].map((f) => <div><dd class="display h-1">{f.value} <span class="u">{f.unit}</span></dd><dt class="small muted">{f.label}</dt></div>)}</dl>
+      <p class="small muted" style="margin-top:16px;max-width:60ch">{figures.note}</p>
+    </div>
+  </section>
+  <CTA />
+  <FilmDialog />
+</Base>
+<style>
+  .al-copy,.al-pics{grid-column:1/-1}.al-pics{margin-top:32px}
+  .tl-h{grid-column:1/-1;margin-bottom:24px}
+  .tl{grid-column:1/-1;border-top:1.5px solid var(--ink)}
+  .tl li{display:grid;gap:8px;padding:22px 0;border-bottom:1px solid var(--rule-strong)}
+  .tl-era{font-size:clamp(2.5rem,2rem + 3vw,4.5rem);line-height:.9;color:var(--link)}
+  .mis-l,.vals{grid-column:1/-1}
+  .vals{display:grid;gap:0;margin-top:28px;border-top:1px solid var(--rule-dark)}
+  .vals li{padding:18px 0;border-bottom:1px solid var(--rule-dark);display:grid;gap:4px}
+  .pr-pic,.pr-copy,.ops-h,.ops{grid-column:1/-1}.pr-copy{margin-top:20px}
+  .pr-pic :global(img){width:100%}
+  .ops{display:grid;gap:0;margin-top:20px;border-top:1.5px solid var(--ink)}
+  .ops div{padding:16px 0;border-bottom:1px solid var(--rule);display:grid;gap:4px}
+  .scale{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:20px}
+  .scale .u{font-size:.45em;color:var(--link)}
+  @media (min-width:900px){
+    .al-copy{grid-column:1/7}.al-pics{grid-column:7/13;margin-top:0}
+    .tl-h{grid-column:1/5}.tl{grid-column:5/13}.tl li{grid-template-columns:11rem 1fr;align-items:baseline}
+    .mis-l{grid-column:1/7}.vals{grid-column:8/13;margin-top:0}
+    .pr-pic{grid-column:1/7}.pr-copy{grid-column:8/13;margin-top:0;align-self:center}
+    .ops-h{grid-column:1/5}.ops{grid-column:5/13;grid-template-columns:1fr 1fr;column-gap:32px;margin-top:0}
+    .scale{grid-template-columns:repeat(4,1fr)}
+  }
+</style>

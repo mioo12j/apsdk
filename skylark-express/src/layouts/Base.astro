@@ -1,0 +1,67 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { company } from '../data/company';
+import { ORIGIN } from '../data/site';
+import { integrations } from '../config/integrations';
+interface Props { title: string; description: string; path?: string; noindex?: boolean; ogImage?: string; preloadImage?: string; jsonld?: object[]; bare?: boolean }
+const { title, description, path = Astro.url.pathname, noindex = false, ogImage = '/brand/og-skylark-express.jpg', jsonld = [] } = Astro.props;
+const clean = path === '/' ? '/' : path.replace(/\/$/, '');
+const canonical = ORIGIN + clean;
+const preview = integrations.siteMode === 'preview';
+const fullTitle = clean === '/' ? `${company.name} | Road, rail and air freight across India` : `${title} | ${company.name}`;
+const org = {
+  '@context': 'https://schema.org', '@type': 'Organization', '@id': ORIGIN + '/#organization', name: company.legalName, alternateName: company.name,
+  url: ORIGIN + '/', logo: ORIGIN + '/brand/skylark-express-logo.png', foundingDate: '1993', slogan: company.brandLine, email: company.email,
+  founders: [{ '@type': 'Person', name: 'Rakesh Yadav', jobTitle: 'Chief Managing Director' }, { '@type': 'Person', name: 'Naveen Yadav', jobTitle: 'Managing Director' }],
+  address: { '@type': 'PostalAddress', streetAddress: 'Sector 17–18 Divider Road, Sector 18', addressLocality: 'Gurugram', addressRegion: 'Haryana', postalCode: '122022', addressCountry: 'IN' },
+  contactPoint: company.phones.map((p) => ({ '@type': 'ContactPoint', telephone: p.tel, contactType: 'customer service', areaServed: 'IN', availableLanguage: ['en', 'hi'], hoursAvailable: { '@type': 'OpeningHoursSpecification', dayOfWeek: company.hours.days, opens: company.hours.opens, closes: company.hours.closes } })),
+};
+---
+<!doctype html>
+<html lang="en-IN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {(noindex || preview) && <meta name="robots" content="noindex, nofollow" />}
+    <meta name="theme-color" content="#0B202C" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preload" href="/fonts/barlow-condensed-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={company.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ORIGIN + ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_IN" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <slot name="head" />
+    <script type="application/ld+json" set:html={JSON.stringify([org, ...jsonld])} />
+    <script is:inline>document.documentElement.classList.add('js')</script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to main content</a>
+    {preview && <div class="preview-ribbon" role="note">Preview build · customer tools use a labelled local test API · not indexed</div>}
+    <Header />
+    <main id="main" tabindex="-1"><slot /></main>
+    <Footer />
+    <dialog class="search-dialog" data-search aria-label="Search the site">
+      <form class="sd-head" role="search" onsubmit="return false">
+        <label class="sr-only" for="site-search">Search pages, services, branches and help</label>
+        <input class="input" id="site-search" type="search" placeholder="Search pages, services, branches, help" autocomplete="off" enterkeyhint="search" />
+        <button class="close-x" type="button" data-search-close>Close</button>
+      </form>
+      <div class="sd-results" data-search-results role="region" aria-live="polite" aria-label="Search results"><p class="small muted" style="padding:12px">Try “Bangalore”, “PTL”, “cold chain” or “proof of delivery”.</p></div>
+    </dialog>
+    <script>import '../scripts/site.ts';</script>
+  </body>
+</html>

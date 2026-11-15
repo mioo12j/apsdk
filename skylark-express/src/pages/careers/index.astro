@@ -1,0 +1,59 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import Pic from '../../components/Pic.astro';
+import { roles, rolesListDate } from '../../data/careers';
+import { company } from '../../data/company';
+const open = roles.filter((r) => r.status === 'open');
+const d = (iso: string) => new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' }).format(new Date(iso + 'T12:00:00+05:30'));
+---
+<Base title="Careers" description="Work in operations-led logistics at Skylark Express. See dated open roles and apply by email to the careers team.">
+  <PageHero eyebrow="Careers" title="The work is on the dock, the road and the apron." lede="Skylark is led by operations. Most of us started by handling freight, and the people who plan the movements still know what the dock looks like at six in the morning." />
+  <section class="section-tight" style="padding-top:0">
+    <div class="wrap grid">
+      <div class="c-pic" data-reveal="mask"><Pic name="team" alt="A shift lead with a tablet briefs dock staff wearing Skylark jackets on the warehouse floor" ratio={16 / 9} widths={[640, 1024, 1600]} sizes="(min-width:900px) 60vw, 92vw" /></div>
+      <ul class="c-pts" role="list">
+        <li><h2 class="display h-3">You will see the result of your work</h2><p>A consignment either arrives on time with its record complete, or it does not. Everyone can see which.</p></li>
+        <li><h2 class="display h-3">Safe handling comes first</h2><p>Nobody is asked to move a load that is not secured, or to drive a vehicle that failed its check.</p></li>
+        <li><h2 class="display h-3">Founders you can reach</h2><p>Both founders still lead the business. Decisions do not take long.</p></li>
+      </ul>
+    </div>
+  </section>
+  <section class="section-tight rule-top" aria-labelledby="roles-h">
+    <div class="wrap">
+      <h2 class="display h-1" id="roles-h">Open roles</h2>
+      <p class="muted" style="margin-top:6px">Roles list dated <time datetime={rolesListDate}>{d(rolesListDate)}</time>. Please check with the careers team that a vacancy is still open before you apply.</p>
+      {open.length ? (
+        <ul class="roles" role="list">
+          {open.map((r) => (
+            <li><a href={`/careers/${r.slug}`}>
+              <span class="display h-2">{r.title}</span>
+              <span class="r-meta"><span>{r.city}</span><span>{r.arrangement}</span><span>{r.team}</span><span>Posted <time datetime={r.posted}>{d(r.posted)}</time></span></span>
+              <span class="r-arr" aria-hidden="true">→</span>
+            </a></li>
+          ))}
+        </ul>
+      ) : (
+        <div class="notice" style="margin-top:20px"><p class="notice-h">There are no confirmed openings today.</p><p>We still like hearing from people who want to work in logistics operations. Send an expression of interest to <a href={`mailto:${company.careersEmail}?subject=Expression%20of%20interest`}>{company.careersEmail}</a>.</p></div>
+      )}
+      <div class="c-apply">
+        <h2 class="display h-2">How to apply</h2>
+        <p>Applications are received by email. Open a role and use <strong>Apply by email</strong>, or write to <a href={`mailto:${company.careersEmail}`}>{company.careersEmail}</a> with the role title in the subject line and your CV attached.</p>
+      </div>
+    </div>
+  </section>
+</Base>
+<style>
+  .c-pic,.c-pts{grid-column:1/-1}.c-pic :global(img){width:100%}
+  .c-pts{display:grid;gap:0;margin-top:24px;border-top:1.5px solid var(--ink)}
+  .c-pts li{padding:16px 0;border-bottom:1px solid var(--rule);display:grid;gap:4px}
+  .roles{margin-top:24px;border-top:1.5px solid var(--ink)}
+  .roles a{display:grid;grid-template-columns:1fr auto;gap:6px 16px;padding:20px 0;border-bottom:1px solid var(--rule-strong);text-decoration:none;color:var(--ink);align-items:center}
+  .roles a:hover .display{text-decoration:underline;text-decoration-color:var(--citron);text-decoration-thickness:4px;text-underline-offset:6px}
+  .r-meta{grid-column:1;display:flex;flex-wrap:wrap;gap:4px 16px;color:var(--muted);font-size:.9375rem}
+  .r-meta span+span::before{content:"·";margin-right:16px}
+  .r-arr{grid-row:1/3;grid-column:2;font-size:1.5rem;transition:transform .2s var(--ease)}
+  .roles a:hover .r-arr{transform:translateX(6px)}
+  .c-apply{margin-top:40px;display:grid;gap:10px;max-width:66ch}
+  @media (min-width:900px){.c-pic{grid-column:1/8}.c-pts{grid-column:8/13;margin-top:0}}
+</style>

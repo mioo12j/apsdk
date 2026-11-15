@@ -1,0 +1,31 @@
+---
+import Logo from './Logo.astro';
+import { company } from '../data/company';
+import { footerNav } from '../data/site';
+---
+<footer class="site-footer dark">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand stack" style="--s:16px">
+        <a class="brand" href="/" aria-label="Skylark Express home"><Logo height={40} loading="lazy" /></a>
+        <p class="display h-3">{company.brandLine}</p>
+        <p class="small muted" style="max-width:38ch">{company.legalName}<br />Corporate headquarters: Sector 17–18 Divider Road, Sector 18, Gurugram, Haryana 122022</p>
+        <p class="small">
+          {company.phones.map((p, i) => <><a href={`tel:${p.tel}`}>{p.display}</a>{i === 0 && <span aria-hidden="true"> · </span>}</>)}<br />
+          <a href={`mailto:${company.email}`}>{company.email}</a><br />
+          <span class="muted">{company.hours.display}</span>
+        </p>
+      </div>
+      {Object.entries(footerNav).map(([h, links]) => (
+        <nav aria-label={h}>
+          <h2 class="foot-h">{h}</h2>
+          <ul class="small" role="list">{links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}</ul>
+        </nav>
+      ))}
+    </div>
+    <div class="foot-legal">
+      <span>© {new Date().getFullYear()} {company.legalName}</span>
+      <span class="cluster"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/network#map-credits">Map credits</a></span>
+    </div>
+  </div>
+</footer>

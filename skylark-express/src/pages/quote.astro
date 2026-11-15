@@ -1,0 +1,101 @@
+---
+import Base from '../layouts/Base.astro';
+import Human from '../components/Human.astro';
+import { services } from '../data/services';
+import { company } from '../data/company';
+import { integrations } from '../config/integrations';
+const mode = integrations.forms.mode;
+const submitLabel = mode === 'offline' ? 'Open email draft' : 'Send quote request';
+---
+<Base title="Get a freight quote" description="Tell Skylark Express the service, pickup, destination and cargo. A quote request is an enquiry reviewed by our team.">
+  <section class="page-hero">
+    <div class="wrap q-wrap">
+      <div class="stack" style="--s:14px">
+        <p class="eyebrow">Freight enquiry</p>
+        <h1 class="display h-page">Get a freight quote</h1>
+        <p class="lede">Three short steps. A request is an enquiry reviewed by our team, not a booking. {company.responseTarget}</p>
+        {mode === 'offline' && <p class="notice">This form prepares an email to <strong>{company.email}</strong> in your own mail app. Nothing is sent until you press send there.</p>}
+        {mode === 'test' && <p class="notice warn"><strong>Test environment.</strong> Requests go to a local test API. Nothing reaches Skylark Express.</p>}
+      </div>
+      <form class="q-form" data-quote data-mode={mode} novalidate action={`mailto:${company.email}`} method="post" enctype="text/plain">
+        <ol class="q-steps" role="list" aria-label="Progress" data-q-progress>
+          <li aria-current="step"><span class="mono">1</span> Shipment</li><li><span class="mono">2</span> Details</li><li><span class="mono">3</span> Contact</li>
+        </ol>
+        <div class="notice bad" role="alert" data-q-summary hidden tabindex="-1"></div>
+
+        <fieldset data-q-step="0">
+          <legend class="display h-2">What needs to move?</legend>
+          <div class="field"><label for="q-service">Service</label>
+            <select class="input" id="q-service" name="service" required>
+              <option value="">Choose a service</option>
+              {services.map((s) => <option value={s.slug}>{s.name}</option>)}
+              <option value="integrated">Integrated requirement (more than one)</option>
+              <option value="not-sure">Not sure yet</option>
+            </select><p class="err" hidden></p></div>
+          <div class="q-two">
+            <div class="field"><label for="q-pickup">Pickup city or PIN code</label><input class="input" id="q-pickup" name="pickup" autocomplete="off" required maxlength="80" /><p class="err" hidden></p></div>
+            <div class="field"><label for="q-dest">Destination city or PIN code</label><input class="input" id="q-dest" name="destination" autocomplete="off" required maxlength="80" /><p class="err" hidden></p></div>
+          </div>
+          <div class="field"><label for="q-cargo">Cargo description</label><textarea class="input" id="q-cargo" name="cargo" required maxlength="1200" aria-describedby="q-cargo-h"></textarea><p class="hint" id="q-cargo-h">What it is and how it is packed. For example, “40 cartons of auto spares on 2 pallets”.</p><p class="err" hidden></p></div>
+        </fieldset>
+
+        <fieldset data-q-step="1">
+          <legend class="display h-2">A few details</legend>
+          <div class="q-two" data-for="road-logistics railway-logistics air-logistics project-cargo packaging integrated not-sure">
+            <div class="field"><label for="q-weight">Approximate weight <span class="opt">(optional)</span></label><input class="input" id="q-weight" name="weight" maxlength="60" placeholder="For example, 850 kg" /></div>
+            <div class="field"><label for="q-dims">Dimensions or number of pieces <span class="opt">(optional)</span></label><input class="input" id="q-dims" name="dimensions" maxlength="120" placeholder="L × W × H, or 40 cartons" /></div>
+          </div>
+          <div class="field" data-for="warehousing integrated"><label for="q-storage">Storage requirements <span class="opt">(optional)</span></label><textarea class="input" id="q-storage" name="storage" maxlength="600" placeholder="Pallet positions or square feet, duration, ambient or temperature-controlled"></textarea></div>
+          <div class="field"><label for="q-date">When should it move? <span class="opt">(optional)</span></label><input class="input" id="q-date" name="timing" maxlength="80" placeholder="A date, or “weekly from December”" /></div>
+          <div class="field"><label for="q-notes">Anything else we should know <span class="opt">(optional)</span></label><textarea class="input" id="q-notes" name="notes" maxlength="1200"></textarea><p class="hint">Details carried from the previous page appear here. Please do not include payment or identity documents.</p></div>
+        </fieldset>
+
+        <fieldset data-q-step="2">
+          <legend class="display h-2">How do we reach you?</legend>
+          <div class="q-two">
+            <div class="field"><label for="q-name">Your name</label><input class="input" id="q-name" name="name" autocomplete="name" required maxlength="80" /><p class="err" hidden></p></div>
+            <div class="field"><label for="q-company">Company</label><input class="input" id="q-company" name="company" autocomplete="organization" required maxlength="120" /><p class="err" hidden></p></div>
+          </div>
+          <p class="small" id="q-reach">Give a phone number, an email address, or both. We need at least one.</p>
+          <div class="q-two">
+            <div class="field"><label for="q-phone">Phone <span class="opt">(phone or email required)</span></label><input class="input" id="q-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="20" aria-describedby="q-reach" /><p class="err" hidden></p></div>
+            <div class="field"><label for="q-email">Email <span class="opt">(phone or email required)</span></label><input class="input" id="q-email" name="email" type="email" inputmode="email" autocomplete="email" maxlength="120" aria-describedby="q-reach" /><p class="err" hidden></p></div>
+          </div>
+          <div class="q-review" data-q-review aria-label="Summary of your request"></div>
+          <p class="small muted">We use these details only to reply to this enquiry. See the <a href="/privacy">privacy page</a>.</p>
+        </fieldset>
+
+        <div class="q-nav">
+          <button class="btn btn-ghost" type="button" data-q-back hidden>Back</button>
+          <button class="btn btn-ink" type="button" data-q-next hidden>Continue</button>
+          <button class="btn btn-primary" type="submit" data-q-submit>{submitLabel}</button>
+        </div>
+        <div role="status" aria-live="polite" data-q-status></div>
+      </form>
+      <div class="q-done" data-q-done hidden tabindex="-1"></div>
+      <aside class="q-aside"><h2 class="display h-3">Prefer to talk?</h2><Human lead="" /></aside>
+    </div>
+  </section>
+  <script>import '../scripts/quote.ts';</script>
+</Base>
+<style>
+  .q-wrap{display:grid;gap:28px;max-width:860px}
+  .q-form{display:grid;gap:22px;background:#fff;border:1.5px solid var(--ink);padding:clamp(16px,3vw,32px)}
+  .q-form fieldset{border:0;padding:0;margin:0;display:grid;gap:18px;min-width:0}
+  .q-form legend{padding:0;margin-bottom:6px}
+  .q-two{display:grid;gap:18px}
+  @media (min-width:640px){.q-two{grid-template-columns:1fr 1fr}}
+  .q-steps{display:flex;gap:6px 18px;flex-wrap:wrap;font-size:.875rem;font-weight:600;color:var(--muted)}
+  .q-steps li{display:flex;gap:8px;align-items:center}
+  .q-steps .mono{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;border:1.5px solid currentColor}
+  .q-steps li[aria-current]{color:var(--ink)}.q-steps li[aria-current] .mono{background:var(--citron);border-color:var(--ink)}
+  .q-steps li.done .mono{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .q-nav{display:flex;gap:12px;flex-wrap:wrap}
+  .q-aside{border-top:1px solid var(--rule-strong);padding-top:18px;display:grid;gap:8px}
+  :global(.q-review){border:1px solid var(--rule-strong);background:var(--paper);padding:14px 16px}
+  :global(.q-review dl){display:grid;gap:6px}
+  :global(.q-review dl div){display:grid;grid-template-columns:8.5rem 1fr;gap:10px}
+  :global(.q-review dt){font-weight:600}
+  :global(.q-done){background:#fff;border:1.5px solid var(--ink);padding:clamp(16px,3vw,32px);display:grid;gap:14px}
+  :global(.q-done pre){white-space:pre-wrap;font-family:var(--mono);font-size:.875rem;background:var(--paper);border:1px solid var(--rule-strong);padding:14px;max-height:320px;overflow:auto}
+</style>

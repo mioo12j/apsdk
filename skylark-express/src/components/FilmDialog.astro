@@ -1,0 +1,39 @@
+---
+// Full film player. Nothing is fetched until the visitor presses a play control.
+---
+<dialog class="film-dialog dark" data-film aria-label="The handover, a 42-second brand film">
+  <div class="film-top">
+    <p class="small"><strong>The handover</strong> · 42 seconds · an illustrative shipment journey</p>
+    <button type="button" data-film-close>Close <span class="sr-only">film</span><span aria-hidden="true"> ✕</span></button>
+  </div>
+  <div class="film-stage">
+    <video data-film-video playsinline preload="none" muted tabindex="0" aria-label="The handover brand film">
+      <track kind="captions" srclang="en" label="English" src="/media/the-handover.en.vtt" default />
+    </video>
+  </div>
+  <div>
+    <div class="film-controls" role="group" aria-label="Film controls">
+      <button type="button" data-film-toggle aria-label="Pause">Pause</button>
+      <button type="button" data-film-replay>Replay</button>
+      <input class="film-progress" type="range" min="0" max="42" step="0.1" value="0" data-film-seek aria-label="Seek" />
+      <span class="film-time" data-film-time aria-hidden="true">0:00 / 0:42</span>
+      <button type="button" data-film-mute aria-pressed="false">Sound off</button>
+      <button type="button" data-film-cc aria-pressed="true">Captions</button>
+    </div>
+    <details class="film-transcript">
+      <summary>Read the film transcript</summary>
+      <div class="stack small" style="--s:8px;padding-bottom:8px">
+        <p>An illustrative shipment journey following one kraft carton sealed with Skylark tape. There is no speech.</p>
+        <p><strong>0:00 Pickup.</strong> At a dispatch counter before sunrise a hand scans the carton’s label. A red scan line holds on the barcode. Sound: tape tearing, one scan beep.</p>
+        <p><strong>0:04 First mile.</strong> A white Skylark courier van drives left to right through a city street, then pulls up at bay 4 of a hub. Sound: engine, a door closing.</p>
+        <p><strong>0:09 Hub.</strong> A dock worker in a Skylark jacket moves the carton onto a trolley towards a scan station. From above, a pallet jack rolls away and reveals a painted yellow lane line leading to the open bay. Sound: wheels, a scan beep.</p>
+        <p><strong>0:15 The right mode for the load: road.</strong> A Skylark truck eases out of the amber-lit loading bay and passes the camera, its side panel filling the frame.</p>
+        <p><strong>0:21 Rail.</strong> A freight train passes a siding where a Skylark-labelled pallet waits at the handover point. Sound: rail rhythm.</p>
+        <p><strong>0:26 Air.</strong> A high-loader lifts a Skylark-wrapped pallet to the cargo door of an unbranded freighter. The aircraft then climbs into a pale morning sky.</p>
+        <p><strong>0:33 Delivery.</strong> At a factory receiving bay the recipient scans the same carton. An example delivery record reads “Delivered” and “Proof of delivery”. Sound: a final double beep.</p>
+        <p><strong>0:38 Close.</strong> A truck travels away along a highway at dusk. The Skylark logo and the line “Speed. Safety. Savings.” hold to the end.</p>
+      </div>
+    </details>
+  </div>
+</dialog>
+<script>import '../scripts/film.ts';</script>

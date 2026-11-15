@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.astro/
+media-src/work/
+media-src/clips/raw/
+map-src/Admin2.shp
+map-src/india-soi.geojson
+*.log
+media-src/keys/

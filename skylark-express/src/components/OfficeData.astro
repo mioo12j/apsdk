@@ -1,0 +1,9 @@
+---
+import { offices, telHref, mapsHref } from '../data/offices';
+import { markers } from '../data/mapgeo';
+const data = {
+  offices: offices.map((o) => ({ ...o, tel: o.phone ? telHref(o.phone) : '', directions: o.address ? mapsHref(o.address) : '' })),
+  markers: markers.map((m) => ({ id: m.id, members: m.members.map((x) => x.id), label: m.label })),
+};
+---
+<script type="application/json" id="office-data" set:html={JSON.stringify(data)} />

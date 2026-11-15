@@ -1,0 +1,32 @@
+---
+// Docket entry. Works without JavaScript (GET to /track) and without any animation bundle.
+interface Props { id?: string; compact?: boolean; dark?: boolean }
+const { id = 'track', compact = false } = Astro.props;
+---
+<form class:list={['track-form', { compact }]} action="/track" method="get" data-track-entry novalidate>
+  <div class="field">
+    <label for={`${id}-n`}>Docket or AWB number</label>
+    <div class="tf-row">
+      <input class="input mono" id={`${id}-n`} name="number" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="80" aria-describedby={`${id}-h ${id}-e`} enterkeyhint="search" />
+      <button class="btn btn-primary" type="submit">Track shipment</button>
+    </div>
+    <p class="hint" id={`${id}-h`}>Printed on your consignment note and on each label.</p>
+    <p class="err" id={`${id}-e`} role="alert" hidden></p>
+  </div>
+</form>
+<style>
+  .tf-row{display:grid;gap:10px}
+  @media (min-width:520px){.tf-row{grid-template-columns:1fr auto}}
+  .track-form.compact .hint{font-size:.8125rem}
+</style>
+<script>
+  import { validateDockets } from '../scripts/dockets';
+  document.querySelectorAll<HTMLFormElement>('[data-track-entry]').forEach((f) => {
+    const input = f.querySelector<HTMLInputElement>('input')!, err = f.querySelector<HTMLElement>('.err')!;
+    f.addEventListener('submit', (e) => {
+      const r = validateDockets(input.value);
+      if (!r.ok) { e.preventDefault(); err.textContent = r.message; err.hidden = false; input.setAttribute('aria-invalid', 'true'); input.focus(); }
+    });
+    input.addEventListener('input', () => { err.hidden = true; input.removeAttribute('aria-invalid'); });
+  });
+</script>

@@ -1,0 +1,409 @@
+---
+import Base from '../layouts/Base.astro';
+import Pic from '../components/Pic.astro';
+import TrackForm from '../components/TrackForm.astro';
+import FilmDialog from '../components/FilmDialog.astro';
+import IndiaMap from '../components/IndiaMap.astro';
+import OfficeData from '../components/OfficeData.astro';
+import Founders from '../components/Founders.astro';
+import PodExample from '../components/PodExample.astro';
+import { getImage } from 'astro:assets';
+import heroPoster from '../assets/img/hero-poster.png';
+import heroMobile from '../assets/img/hero-45-gen.jpg';
+import { company, figures } from '../data/company';
+import { services } from '../data/services';
+import { offices } from '../data/offices';
+
+// Art-directed hero poster: 16:9 first frame of the truck take on wide screens, 4:5 dispatch poster on phones.
+const mk = async (src: ImageMetadata, ws: number[], format: 'avif' | 'webp' | 'jpeg', quality: number) =>
+  (await Promise.all(ws.map(async (w) => `${(await getImage({ src, width: w, format, quality })).src} ${w}w`))).join(', ');
+const dW = [960, 1440, 1920], mW = [480, 720, 960];
+const hero = {
+  dAvif: await mk(heroPoster, dW, 'avif', 50), dWebp: await mk(heroPoster, dW, 'webp', 62),
+  mAvif: await mk(heroMobile, mW, 'avif', 48), mWebp: await mk(heroMobile, mW, 'webp', 60),
+  fallback: (await getImage({ src: heroPoster, width: 1440, format: 'jpeg', quality: 70 })).src,
+};
+const homeFigures = [figures.since, figures.warehouses, figures.pinCodes]; // at most three together on Home
+const journey = [
+  { k: 'Pickup', img: 'film-pickup', alt: 'A hand scans the label of a kraft carton sealed with Skylark tape at a dispatch counter', text: 'The carton is sealed, labelled and scanned at the counter. From this scan onward it has a docket and a named custodian.', ev: '12 Nov, 17:42 IST · Gurugram · Picked up' },
+  { k: 'Hub', img: 'film-hub', alt: 'A dock worker in a Skylark jacket places the carton on a trolley beside a scan station', text: 'At the hub dock it is counted off the van, scanned again and staged with the freight travelling the same way.', ev: '12 Nov, 21:10 IST · Gurugram hub · Received and staged' },
+  { k: 'Linehaul', img: 'hero-settle', alt: 'The side panel of a Skylark Express truck passing the loading bay', text: 'Road, rail or air: the mode is chosen for the load. Each handover between vehicles is recorded.', ev: '13 Nov, 04:35 IST · Delhi · Departed on linehaul' },
+  { k: 'Delivery', img: 'film-delivery', alt: 'A recipient at a factory receiving bay scans the same carton', text: 'The recipient scans the same label at the receiving bay. The signed delivery record closes the docket.', ev: '13 Nov, 12:48 IST · Bengaluru · Delivered' },
+];
+const published = offices.filter((o) => o.kind !== 'city').length, listed = offices.length - published;
+---
+<Base title="Home" description="Skylark Express brings road, rail and air freight together with warehousing, specialist packaging and project cargo across India. Track a docket or request a freight quote.">
+  <Fragment slot="head">
+    <link rel="preload" as="image" imagesrcset={hero.dAvif} imagesizes="100vw" type="image/avif" media="(min-width:768px)" fetchpriority="high" />
+  </Fragment>
+
+  <!-- 01 · Dispatch -->
+  <section class="hero dark" data-hero aria-labelledby="hero-h">
+    <div class="hero-media" data-hero-media>
+      <picture>
+        <source media="(max-width:767px)" type="image/avif" srcset={hero.mAvif} sizes="100vw" />
+        <source media="(max-width:767px)" type="image/webp" srcset={hero.mWebp} sizes="100vw" />
+        <source type="image/avif" srcset={hero.dAvif} sizes="100vw" />
+        <source type="image/webp" srcset={hero.dWebp} sizes="100vw" />
+        <img src={hero.fallback} width="1920" height="1080" alt="A Skylark Express truck eases out of an amber-lit loading bay before sunrise, beside a painted yellow lane line" fetchpriority="high" decoding="async" data-hero-poster />
+      </picture>
+      <video class="hero-video" muted playsinline preload="none" aria-hidden="true" tabindex="-1" data-hero-video></video>
+      <span class="hero-lane" aria-hidden="true"></span>
+    </div>
+    <div class="wrap hero-inner">
+      <div class="hero-copy" data-hero-copy>
+        <p class="eyebrow">{company.brandLine}</p>
+        <h1 class="display h-hero" id="hero-h">From the first <br class="br-d" />pickup to the <br class="br-d" />final handover.</h1>
+        <p class="lede hero-sub">Skylark brings road, rail and air freight together with warehousing, specialist packaging and project cargo across India.</p>
+        <div class="hero-panel">
+          <TrackForm id="hero-track" compact />
+        </div>
+        <div class="hero-actions">
+          <a class="btn btn-ghost" href="/quote">Get a freight quote <span class="arr" aria-hidden="true">→</span></a>
+          <button class="play-film hero-play" type="button" data-film-open>
+            <span class="pf-ic" aria-hidden="true"><svg width="12" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z" fill="currentColor"/></svg></span>
+            Play film · 42 seconds
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 · First handover -->
+  <section class="section facts" aria-labelledby="facts-h" data-route>
+    <span class="route" aria-hidden="true"></span>
+    <div class="wrap grid">
+      <div class="facts-lead">
+        <p class="eyebrow" data-reveal>First handover</p>
+        <h2 class="display h-1" id="facts-h" data-reveal>One team, from the plan to the proof of delivery.</h2>
+        <p class="lede" data-reveal style="--d:80ms">Skylark combines consultation, planning, implementation and day-to-day execution: first-mile collection, long-distance transport, storage, distribution, final delivery and reverse logistics. Discuss a single service or the whole movement.</p>
+      </div>
+      <dl class="facts-grid">
+        {homeFigures.map((f, i) => (
+          <div data-reveal style={`--d:${i * 110}ms`}>
+            <dd class="display fig" data-count>{f.value.replace('Since ', '')}{'unit' in f ? <span class="unit"> {f.unit}</span> : <span class="unit"> since</span>}</dd>
+            <dt>{f.label}</dt>
+          </div>
+        ))}
+      </dl>
+      <p class="small muted facts-note" data-reveal>{figures.note} <a href="/serviceability">Check a PIN code</a></p>
+    </div>
+  </section>
+
+  <!-- 03 · Follow a consignment -->
+  <section class="journey dark" id="journey" aria-labelledby="journey-h" data-journey>
+    <div class="j-sticky">
+      <div class="wrap grid j-grid">
+        <div class="j-copy">
+          <p class="eyebrow">Follow a consignment</p>
+          <h2 class="display h-1" id="journey-h">Four handovers. One docket.</h2>
+          <p class="small j-meta"><span class="tag example">Illustrative example</span> <a class="j-skip" href="#services">Skip shipment journey</a></p>
+          <ol class="j-steps" role="list">
+            {journey.map((s, i) => (
+              <li class:list={['j-step', { on: i === 0 }]} data-step={i}>
+                <figure class="j-still"><Pic name={s.img} alt={s.alt} ratio={16 / 9} widths={[480, 800]} sizes="92vw" /></figure>
+                <div>
+                  <h3 class="display h-2"><span class="mono j-n">0{i + 1}</span>{s.k}</h3>
+                  <p>{s.text}</p>
+                  <p class="mono small j-ev">EXAMPLE-1004 · {s.ev}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+        <div class="j-stage" aria-hidden="true">
+          {journey.map((s, i) => <div class:list={['j-frame', { on: i === 0 }]} data-frame={i}><Pic name={s.img} alt="" ratio={16 / 9} widths={[800, 1200]} sizes="(min-width:1024px) 56vw, 0px" /></div>)}
+          <video class="j-video" muted playsinline preload="none" tabindex="-1" data-journey-video></video>
+          <div class="j-rail"><span class="j-fill" data-journey-fill></span>{journey.map((s, i) => <span class="j-node" style={`left:${(i / 3) * 100}%`}><b>{s.k}</b></span>)}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 · Choose a service -->
+  <section class="section services" id="services" aria-labelledby="svc-h" data-route>
+    <span class="route" aria-hidden="true"></span>
+    <div class="wrap">
+      <div class="svc-head">
+        <p class="eyebrow" data-reveal>Six service lines</p>
+        <h2 class="display h-page" id="svc-h" data-reveal>What are you moving?</h2>
+      </div>
+      <div class="grid svc-grid" data-services>
+        <ul class="svc-rows" role="list">
+          {services.map((s, i) => (
+            <li class:list={['svc-row', { on: i === 0 }]} data-svc={i}>
+              <a href={`/services/${s.slug}`} class="svc-link" data-svc-link>
+                <span class="mono svc-n" aria-hidden="true">{s.index}</span>
+                <span class="svc-thumb"><Pic name={s.image} alt="" ratio={1} widths={[160, 320]} sizes="80px" /></span>
+                <span class="svc-text"><span class="display svc-name">{s.name}</span><span class="svc-sum">{s.summary}</span></span>
+                <span class="svc-arr" aria-hidden="true">→</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <div class="svc-preview" aria-hidden="true">
+          {services.map((s, i) => <div class:list={['svc-img', { on: i === 0 }]} data-svc-img={i}><Pic name={s.image} alt="" ratio={4 / 5} widths={[480, 800, 1100]} sizes="(min-width:900px) 38vw, 0px" /></div>)}
+        </div>
+      </div>
+      <p class="svc-foot" data-reveal>Not sure which one fits? <a href="/services">Use the service selector</a></p>
+    </div>
+  </section>
+
+  <!-- 05 · The network -->
+  <section class="section network dark" aria-labelledby="net-h" data-network="home" data-view="list">
+    <OfficeData />
+    <div class="wrap grid net-grid">
+      <div class="net-copy">
+        <p class="eyebrow" data-reveal>The network</p>
+        <h2 class="display h-1" id="net-h" data-reveal>Run from Gurugram. Listed in {offices.length} locations.</h2>
+        <p class="lede" data-reveal>{published} offices with published addresses and {listed} more listed cities. The map shows listed locations; only a serviceability check confirms a particular PIN code and shipment type.</p>
+        <div class="net-tools" data-reveal>
+          <form class="field" role="search" aria-label="Find a branch">
+            <label for="home-branch">Find a branch</label>
+            <input class="input" id="home-branch" type="search" placeholder="City, region or PIN" autocomplete="off" data-branch-search enterkeyhint="search" />
+          </form>
+          <form class="field" action="/serviceability" method="get">
+            <label for="home-pin">Check a PIN code</label>
+            <div class="pin-row">
+              <input class="input mono" id="home-pin" name="pin" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="6 digits" autocomplete="postal-code" />
+              <button class="btn btn-ghost" type="submit">Check</button>
+            </div>
+          </form>
+        </div>
+        <p class="sr-only" role="status" aria-live="polite" data-network-status></p>
+        <div class="net-results" data-branch-results></div>
+        <div class="net-panel" data-office-panel hidden></div>
+        <p class="cluster net-links">
+          <a class="link-arrow" href="/network">Open the full directory <span class="arr" aria-hidden="true">→</span></a>
+          <button class="btn btn-ghost net-toggle" type="button" data-view-btn="map" aria-pressed="false">Show the map</button>
+        </p>
+      </div>
+      <div class="net-map" data-map-view>
+        <h3 class="sr-only">Map view of listed locations</h3>
+        <IndiaMap id="home-map" />
+        <p class="small muted map-cap">Dots mark listed locations at city level. North is up.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 · The people -->
+  <section class="section people petrol" aria-labelledby="people-h">
+    <div class="wrap grid people-grid">
+      <div class="people-copy">
+        <p class="eyebrow" data-reveal>The people</p>
+        <h2 class="display h-1" id="people-h" data-reveal>In 1993 the two founders were the whole company.</h2>
+        <div class="prose" data-reveal style="--d:80ms">
+          <p class="lede">Brothers Rakesh Yadav and Naveen Yadav started without an office or a fleet. They took the bookings themselves, and they made the deliveries themselves.</p>
+          <p>Handling the first consignments personally taught them what a customer asks at each handover: who has it now, and when will it arrive? The business they lead today, from Gurugram, is organised around answering those two questions.</p>
+          <p><a class="link-arrow" href="/about">Read the Skylark story <span class="arr" aria-hidden="true">→</span></a></p>
+        </div>
+      </div>
+      <div class="people-pics"><Founders /></div>
+    </div>
+  </section>
+
+  <!-- 07 · Arrival -->
+  <section class="section arrival" aria-labelledby="arr-h" data-route="end">
+    <span class="route" aria-hidden="true"></span>
+    <div class="wrap grid">
+      <div class="arr-copy">
+        <p class="eyebrow" data-reveal>Arrival</p>
+        <h2 class="display h-1" id="arr-h" data-reveal>The journey ends with a record.</h2>
+        <p class="lede" data-reveal>When the consignee receives the goods, the delivery is recorded and the proof of delivery (POD) is available to authorised customers. This is what an example looks like.</p>
+      </div>
+      <div class="arr-pod" data-reveal><div data-reveal class="podx-wrap"><PodExample /></div></div>
+    </div>
+  </section>
+
+  <section class="closing dark" aria-labelledby="close-h">
+    <div class="closing-media" data-parallax><Pic name="sunset" alt="A Skylark Express truck parked on a highway lay-by at sunset" sizes="100vw" widths={[640, 1024, 1600, 2200]} /></div>
+    <div class="wrap closing-inner">
+      <div class="closing-panel" data-reveal>
+        <h2 class="display h-page" id="close-h">Tell us what needs to move.</h2>
+        <p class="lede">Share the cargo, the pickup point and the destination. Our team will help plan the movement.</p>
+        <p class="cluster">
+          <a class="btn btn-primary" href="/quote">Get a freight quote <span class="arr" aria-hidden="true">→</span></a>
+          <a class="btn btn-ghost" href="/track">Track shipment</a>
+        </p>
+        <dl class="closing-contact">
+          <div><dt>Call</dt><dd>{company.phones.map((p) => <a href={`tel:${p.tel}`}>{p.display}</a>)}</dd></div>
+          <div><dt>Email</dt><dd><a href={`mailto:${company.email}`}>{company.email}</a></dd></div>
+          <div><dt>Hours</dt><dd>{company.hours.display}</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <FilmDialog />
+  <script>import '../scripts/network.ts';</script>
+  <script>import '../scripts/home.ts';</script>
+</Base>
+
+<style>
+  /* ── hero ── */
+  .hero{position:relative;isolation:isolate;overflow:clip}
+  .hero-media{position:relative}
+  .hero-media img,.hero-video{width:100%;height:100%;object-fit:cover;display:block}
+  .hero-video{position:absolute;inset:0;opacity:0;transition:opacity .5s var(--ease)}
+  .hero-video.on{opacity:1}
+  .hero-inner{position:relative;z-index:2;padding-block:24px 24px}
+  .hero-copy{display:grid;gap:16px;max-width:680px}
+  .hero-sub{color:var(--paper)}
+  .hero-panel{background:var(--petrol);padding:16px;border-radius:var(--r);border:1px solid var(--rule-dark)}
+  .hero-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .br-d{display:none}
+  .hero-lane{display:none}
+  @media (max-width:767px){
+    .hero{display:flex;flex-direction:column}
+    .hero-inner{order:1}
+    .hero-media{order:2;aspect-ratio:4/5}
+    .hero .eyebrow{display:none}
+    .hero-sub{order:5}
+    .hero-actions .btn{flex:1 1 100%}
+  }
+  @media (min-width:768px){
+    .hero{min-height:min(calc(100svh - var(--header-h)),1080px);display:grid}
+    .hero-media{position:absolute;inset:0;z-index:0}
+    .hero-media::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(11,32,44,.95) 0%,rgba(11,32,44,.84) 28%,rgba(11,32,44,.3) 52%,rgba(11,32,44,0) 68%),linear-gradient(0deg,rgba(11,32,44,.45),rgba(11,32,44,0) 30%)}
+    .hero-inner{display:grid;align-content:center;padding-block:clamp(24px,5vh,72px)}
+    .hero-copy{gap:clamp(12px,2vh,22px);max-width:min(52vw,660px)}
+    .hero-sub{max-width:44ch}
+    .hero-panel{max-width:600px;padding:18px 20px}
+    .br-d{display:inline}
+    .hero .h-hero{font-size:clamp(3rem,min(7.4vw,11.6vh),6.75rem)}
+    .hero-lane{display:block;position:absolute;left:var(--route-x);bottom:0;width:3px;height:14%;background:linear-gradient(to bottom,rgba(213,239,68,0),var(--citron));z-index:1;margin-left:calc((100vw - min(100vw,var(--max)))/2)}
+  }
+  @media (min-width:768px) and (max-height:780px){.hero .eyebrow{display:none}.hero-sub{font-size:1rem}.hero-panel :global(.hint){display:none}}
+  /* ── route line ── */
+  .route{display:none}
+  @media (min-width:900px){
+    [data-route]{--p:1}
+    .route{display:block;position:absolute;top:0;bottom:0;left:calc(var(--route-x) + (100vw - min(100vw,var(--max)))/2);width:2px;background:linear-gradient(to bottom,var(--ink) calc(var(--p)*100%),var(--rule) 0);pointer-events:none}
+    .route::after{content:"";position:absolute;left:-5px;top:calc(var(--p)*100% - 6px);width:12px;height:12px;border-radius:50%;background:var(--citron);border:2px solid var(--ink)}
+    [data-route="end"] .route{bottom:auto;height:var(--route-end,60%)}
+  }
+  /* ── facts ── */
+  .facts-lead{grid-column:1/-1;display:grid;gap:18px}
+  .facts-grid{grid-column:1/-1;display:grid;gap:0;margin-top:40px;border-top:1px solid var(--rule-strong)}
+  .facts-grid>div{padding:20px 0;border-bottom:1px solid var(--rule)}
+  .facts-grid dt{color:var(--muted);font-size:.9375rem;margin-top:6px}
+  .fig{font-size:clamp(3rem,2rem + 5vw,5.5rem);line-height:.9;display:flex;flex-wrap:wrap;align-items:baseline;gap:0 .2em}
+  .fig .unit{font-size:.4em;line-height:1.1;color:var(--link)}
+  .facts-note{grid-column:1/-1;margin-top:20px;max-width:60ch}
+  @media (min-width:900px){
+    .facts-lead{grid-column:1/9}
+    .facts-grid{grid-column:1/10;grid-template-columns:repeat(3,1fr);column-gap:24px;margin-top:64px}
+    .facts-grid>div{border-bottom:0;padding:24px 0 0}
+    .facts-note{grid-column:1/8}
+  }
+  /* ── journey ── */
+  .journey{position:relative;padding-block:clamp(64px,9vw,120px)}
+  .j-copy{grid-column:1/-1;display:grid;gap:16px;align-content:start}
+  .j-meta{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
+  .j-skip{display:none;min-height:44px;align-items:center}
+  .j-steps{display:grid;gap:32px;margin-top:12px}
+  .j-step{display:grid;gap:14px}
+  .j-step h3{display:flex;align-items:baseline;gap:12px}
+  .j-n{font-size:.8125rem;color:var(--navy);background:var(--citron);padding:3px 7px;border-radius:3px;font-weight:600;transform:translateY(-4px)}
+  .j-ev{color:var(--cyan);margin-top:8px}
+  .j-still :global(img){width:100%;display:block}
+  .j-stage{display:none}
+  @media (min-width:1024px){
+    .j-copy{grid-column:1/5}
+    .j-still{display:none}
+    .j-stage{display:block;grid-column:5/13;position:relative;align-self:center;aspect-ratio:16/10;background:var(--petrol);overflow:hidden}
+    .j-frame{position:absolute;inset:0;opacity:0;transition:opacity .5s var(--ease)}
+    .j-frame.on{opacity:1}
+    .j-frame :global(img){width:100%;height:100%;object-fit:cover}
+    .j-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s}
+    .j-video.on{opacity:1}
+    .j-rail{position:absolute;left:28px;right:28px;bottom:26px;height:2px;background:rgba(246,244,238,.35)}
+    .j-fill{position:absolute;inset:0;background:var(--citron);transform-origin:left;transform:scaleX(var(--jp,0))}
+    .j-node{position:absolute;top:-5px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:var(--navy);border:2px solid var(--paper)}
+    .j-node b{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);font:600 .6875rem var(--body);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;text-shadow:0 1px 8px rgba(4,14,20,.9)}
+    .j-node:first-of-type b{left:0;transform:none}.j-node:last-of-type b{left:auto;right:0;transform:none}
+    .j-stage::after{content:"";position:absolute;inset:auto 0 0 0;height:30%;background:linear-gradient(to top,rgba(4,14,20,.7),transparent);pointer-events:none}
+    .j-rail{z-index:2}
+  }
+  @media (min-width:1024px) and (min-height:700px) and (prefers-reduced-motion:no-preference){
+    :global(.js) .journey{height:420vh;padding-block:0}
+    :global(.js) .j-sticky{position:sticky;top:var(--header-h);height:calc(100vh - var(--header-h));display:grid;align-items:center;overflow:hidden}
+    :global(.js) .j-skip{display:inline-flex}
+    :global(.js) .j-steps{gap:6px}
+    :global(.js) .j-step{opacity:.38;transition:opacity .35s var(--ease),padding .35s var(--ease);padding:8px 0 8px 18px;border-left:2px solid var(--rule-dark)}
+    :global(.js) .j-step p{display:none}
+    :global(.js) .j-step.on{opacity:1;border-left-color:var(--citron);padding-block:14px}
+    :global(.js) .j-step.on p{display:block}
+    :global(.js) .j-stage{aspect-ratio:16/9;max-height:72vh;justify-self:end;width:min(100%,calc(72vh*16/9))}
+  }
+  /* ── services ── */
+  .svc-head{display:grid;gap:14px;margin-bottom:clamp(28px,4vw,56px)}
+  .svc-rows{grid-column:1/-1;border-top:1.5px solid var(--ink)}
+  .svc-row{border-bottom:1px solid var(--rule-strong)}
+  .svc-link{display:grid;grid-template-columns:64px 1fr auto;gap:14px;align-items:center;padding:14px 0;text-decoration:none;color:var(--ink);min-height:88px}
+  .svc-n{display:none;color:var(--muted);font-size:.875rem}
+  .svc-thumb{width:64px;height:64px;overflow:hidden;background:var(--paper-2)}
+  .svc-thumb :global(img){width:100%;height:100%;object-fit:cover}
+  .svc-text{display:grid;gap:2px}
+  .svc-name{font-size:clamp(1.625rem,1.2rem + 2.4vw,3.25rem);line-height:1}
+  .svc-sum{font-size:.9375rem;color:var(--muted);line-height:1.35}
+  .svc-arr{font-size:1.5rem;transition:transform .25s var(--ease)}
+  .svc-link:hover .svc-arr,.svc-link:focus-visible .svc-arr{transform:translateX(6px)}
+  .svc-preview{display:none}
+  .svc-foot{margin-top:28px}
+  @media (min-width:900px){
+    .svc-rows{grid-column:1/8}
+    .svc-link{grid-template-columns:48px 1fr auto;padding:20px 0;min-height:104px;transition:padding .3s var(--ease),background-color .3s}
+    .svc-thumb{display:none}.svc-n{display:block}
+    .svc-row.on .svc-link{padding-left:16px;background:linear-gradient(90deg,rgba(213,239,68,.5),rgba(213,239,68,0) 70%)}
+    .svc-sum{max-height:0;overflow:hidden;opacity:0;transition:max-height .3s var(--ease),opacity .3s}
+    .svc-row.on .svc-sum{max-height:3em;opacity:1}
+    .svc-preview{display:block;grid-column:8/13;position:sticky;top:calc(var(--header-h) + 24px);align-self:start;aspect-ratio:4/5;background:var(--petrol);overflow:hidden}
+    .svc-img{position:absolute;inset:0;clip-path:inset(0 0 100% 0);transition:clip-path .0s .4s;z-index:1}
+    .svc-img.on{clip-path:inset(0 0 0 0);transition:clip-path .4s var(--ease);z-index:2}
+    .svc-img :global(img){width:100%;height:100%;object-fit:cover;transform:scale(1.06);transition:transform .9s var(--ease)}
+    .svc-img.on :global(img){transform:none}
+  }
+  /* ── network ── */
+  .net-copy{grid-column:1/-1;display:grid;gap:18px;align-content:start}
+  .net-tools{display:grid;gap:16px;margin-top:8px}
+  .pin-row{display:grid;grid-template-columns:1fr auto;gap:10px}
+  .net-map{grid-column:1/-1;margin-top:32px}
+  .map-cap{text-align:center;margin-top:8px}
+  .network[data-view="list"] .net-map{display:none}
+  .network[data-view="map"] .net-toggle{display:none}
+  @media (min-width:900px){
+    .net-copy{grid-column:1/7}
+    .net-map{grid-column:7/13;margin-top:0;display:block!important}
+    .net-toggle{display:none!important}
+    .net-tools{grid-template-columns:1.2fr 1fr}
+  }
+  /* ── people ── */
+  .people-copy{grid-column:1/-1;display:grid;gap:18px;align-content:start}
+  .people-pics{grid-column:1/-1;margin-top:36px}
+  @media (min-width:900px){.people-copy{grid-column:1/7}.people-pics{grid-column:8/13;margin-top:0}.people{padding-block:clamp(96px,12vw,176px)}}
+  /* ── arrival ── */
+  .arr-copy{grid-column:1/-1;display:grid;gap:16px;align-content:start}
+  .arr-pod{grid-column:1/-1;margin-top:28px}
+  @media (min-width:900px){.arr-copy{grid-column:1/6}.arr-pod{grid-column:6/13;margin-top:0}}
+  .closing{position:relative;isolation:isolate;overflow:clip;display:grid}
+  .closing-media{position:absolute;inset:-8% 0;z-index:-1}
+  .closing-media :global(img){width:100%;height:100%;object-fit:cover;object-position:70% 50%}
+  .closing::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(11,32,44,.9) 0%,rgba(11,32,44,.6) 45%,rgba(11,32,44,.05) 75%)}
+  .closing-inner{padding-block:clamp(56px,10vw,140px);min-height:min(88vh,820px);display:grid;align-items:center}
+  .closing-panel{display:grid;gap:20px;max-width:640px}
+  .closing-contact{display:grid;gap:10px;border-top:1px solid var(--rule-dark);padding-top:18px;margin-top:6px}
+  .closing-contact div{display:grid;grid-template-columns:5rem 1fr;gap:10px}
+  .closing-contact dt{font:600 .75rem/1.8 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--cyan)}
+  .closing-contact dd{display:flex;flex-wrap:wrap;gap:2px 18px}
+  .closing-contact a{color:var(--paper);min-height:44px;display:inline-flex;align-items:center;font-weight:600}
+  @media (max-width:767px){
+    .closing{display:flex;flex-direction:column;background:var(--navy)}
+    .closing::after{display:none}
+    .closing-media{position:relative;inset:auto;order:2;aspect-ratio:4/3}
+    .closing-inner{min-height:0}
+  }
+</style>
+<style is:global>
+  @view-transition{navigation:auto}
+</style>

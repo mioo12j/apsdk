@@ -1,0 +1,103 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import IndiaMap from '../components/IndiaMap.astro';
+import OfficeData from '../components/OfficeData.astro';
+import CTA from '../components/CTA.astro';
+import { offices, regionOrder, telHref, mapsHref } from '../data/offices';
+import { map } from '../data/mapgeo';
+import { ORIGIN } from '../data/site';
+const principal = offices.filter((o) => o.kind === 'hq' || o.kind === 'registered');
+const byRegion = regionOrder.map((r) => ({ r, list: offices.filter((o) => o.region === r && o.kind !== 'hq' && o.kind !== 'registered') })).filter((g) => g.list.length);
+const jsonld = offices.filter((o) => o.address).map((o) => ({ '@context': 'https://schema.org', '@type': 'LocalBusiness', name: `Skylark Express – ${o.label}`, parentOrganization: { '@id': ORIGIN + '/#organization' }, telephone: telHref(o.phone!).slice(4), address: { '@type': 'PostalAddress', streetAddress: o.address, postalCode: o.pin, addressRegion: o.state, addressCountry: 'IN' }, url: `${ORIGIN}/network#${o.id}` }));
+---
+<Base title="Network and branches" description="Find a Skylark Express branch: corporate headquarters in Gurugram, registered office in New Delhi, published branches and listed cities across India." jsonld={jsonld}>
+  <PageHero eyebrow="The network" title="Find a branch" lede="Search by city, region, alternative spelling or PIN code. The map and the directory show the same records." />
+  <section class="section-tight net" data-network="full" data-view="list" style="padding-top:0">
+    <OfficeData />
+    <div class="wrap">
+      <form class="net-search field" role="search" aria-label="Branch search">
+        <label for="branch-q">Search branches</label>
+        <input class="input" id="branch-q" type="search" placeholder="Try “Bangalore”, “Punjab” or “110015”" autocomplete="off" data-branch-search enterkeyhint="search" />
+      </form>
+      <p class="net-status small" role="status" aria-live="polite" data-network-status></p>
+      <div class="view-tabs" role="group" aria-label="Choose a view">
+        <button type="button" class="btn btn-ghost" data-view-btn="list" aria-pressed="true">Directory</button>
+        <button type="button" class="btn btn-ghost" data-view-btn="map" aria-pressed="false">Map</button>
+      </div>
+      <div class="grid net-cols">
+        <div class="net-dir" data-list-view>
+          <div class="notice warn" data-empty hidden><p class="notice-h">No listed location matches your search.</p><p>Ask the central team: <a href="tel:+911141666666">+91 11 4166 6666</a> · <a href="/contact?topic=branch">send a message</a>. To ask whether we deliver somewhere, <a href="/serviceability">check a PIN code</a>.</p></div>
+          <section data-group aria-labelledby="g-principal">
+            <h2 class="display h-2" id="g-principal">Headquarters and registered office</h2>
+            <ul class="rows" role="list">
+              {principal.map((o) => (
+                <li class="row principal" id={o.id} data-row={o.id}>
+                  <div><p class:list={['tag', { hq: o.kind === 'hq' }]}>{o.typeLabel}</p><h3 class="display h-3">{o.label}</h3><p class="addr">{o.address}</p></div>
+                  <p class="row-act"><a class="btn btn-ink" href={telHref(o.phone!)}>Call {o.phone}</a><a href={mapsHref(o.address!)} target="_blank" rel="noopener">Directions<span class="sr-only"> to {o.label} (opens a map in a new tab)</span></a><button type="button" class="linkish" data-show={o.id}>Show on map</button></p>
+                </li>
+              ))}
+            </ul>
+          </section>
+          {byRegion.map((g) => (
+            <section data-group aria-labelledby={`g-${g.r}`}>
+              <h2 class="display h-2" id={`g-${g.r}`}>{g.r}</h2>
+              <ul class="rows" role="list">
+                {g.list.map((o) => (
+                  <li class="row" id={o.id} data-row={o.id}>
+                    <div><p class="tag">{o.typeLabel}</p><h3 class="display h-3">{o.label}</h3>
+                      {o.address ? <p class="addr">{o.address}</p> : <p class="addr muted">{o.state}. City location; branch details are shared by the central team.</p>}</div>
+                    <p class="row-act">
+                      {o.kind === 'city'
+                        ? <a class="btn btn-ghost" href={`/contact?topic=branch&city=${encodeURIComponent(o.city)}`}>Ask the central team for branch details<span class="sr-only"> in {o.city}</span></a>
+                        : <><a class="btn btn-ink" href={telHref(o.phone!)}>Call {o.phone}</a><a href={mapsHref(o.address!)} target="_blank" rel="noopener">Directions<span class="sr-only"> to {o.label} (opens a map in a new tab)</span></a></>}
+                      <button type="button" class="linkish" data-show={o.id}>Show on map</button>
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+        <div class="net-side" data-map-view>
+          <h2 class="sr-only">Map of listed locations</h2>
+          <IndiaMap id="net-map" theme="paper" />
+          <div class="net-panel" data-office-panel hidden></div>
+          <p class="small muted">Select a marker or use Tab to move between markers. Markers are centred on the city or locality and labelled “City location” where only a city is listed. The diagram shows listed locations; only a <a href="/serviceability">serviceability lookup</a> can confirm a particular PIN and shipment type.</p>
+          <p class="small muted" id="map-credits"><strong>Map credits.</strong> {map.attribution} Drawn in a Lambert conformal conic projection with north up, including Jammu and Kashmir, Ladakh, the north-east, Lakshadweep and the Andaman and Nicobar Islands as depicted in the source. Boundaries are for general reference.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <CTA title="Not sure which branch handles your lane?" text="Tell the central team where the cargo is and where it is going." href="/contact?topic=branch" label="Ask the central team" />
+  <script>import '../scripts/network.ts';</script>
+</Base>
+<style>
+  .net-search{max-width:560px}
+  .net-status{min-height:1.5em;margin-top:8px}
+  .view-tabs{display:flex;gap:8px;margin:8px 0 20px}
+  .view-tabs .btn{min-height:44px;padding:8px 16px}
+  .view-tabs .btn[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .net-dir,.net-side{grid-column:1/-1}
+  .net[data-view="list"] .net-side{display:none}
+  .net[data-view="map"] .net-dir{display:none}
+  .net-dir{display:grid;gap:40px}
+  .net-side{display:grid;gap:16px;align-content:start}
+  .rows{border-top:1.5px solid var(--ink);margin-top:12px}
+  .row{display:grid;gap:12px;padding:18px 0;border-bottom:1px solid var(--rule-strong);scroll-margin-top:calc(var(--header-h) + 16px)}
+  .row .tag{color:var(--link);margin-bottom:8px}.row .tag.hq{background:var(--citron);color:var(--ink);border-color:var(--ink)}
+  .row .addr{max-width:48ch;margin-top:4px}
+  .row-act{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center}
+  .row-act a:not(.btn),.linkish{min-height:44px;display:inline-flex;align-items:center;font-weight:600}
+  .linkish{background:none;border:0;padding:0;color:var(--link);text-decoration:underline;text-underline-offset:.18em}
+  .row.principal{background:#fff;padding:18px;border:1.5px solid var(--rule-strong);margin-top:12px}
+  .row:target{outline:3px solid var(--link);outline-offset:2px}
+  @media (min-width:1000px){
+    .view-tabs{display:none}
+    .net-dir{grid-column:1/8}
+    .net-side{grid-column:8/13;display:grid!important;position:sticky;top:calc(var(--header-h) + 16px);align-self:start;max-height:calc(100vh - var(--header-h) - 32px);overflow:auto;padding:4px}
+    .net[data-view] .net-dir{display:grid}
+    .row{grid-template-columns:1fr auto;align-items:center}
+    .row-act{justify-content:flex-end;max-width:22rem}
+  }
+</style>

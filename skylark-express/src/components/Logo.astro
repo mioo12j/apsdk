@@ -1,0 +1,9 @@
+---
+import { getImage } from 'astro:assets';
+import logo from '../assets/img/logo.png';
+const { height = 36, loading = 'eager' } = Astro.props;
+const x1 = await getImage({ src: logo, height: 72, format: 'webp', quality: 90 });
+const x2 = await getImage({ src: logo, height: 144, format: 'webp', quality: 90 });
+const w = Math.round((logo.width / logo.height) * height);
+---
+<img src={x1.src} srcset={`${x1.src} 1x, ${x2.src} 2x`} width={w} height={height} alt="Skylark Express" loading={loading} decoding="async" />

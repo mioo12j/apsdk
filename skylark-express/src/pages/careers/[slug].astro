@@ -1,0 +1,58 @@
+---
+import Base from '../../layouts/Base.astro';
+import { roles } from '../../data/careers';
+import { company } from '../../data/company';
+import { ORIGIN } from '../../data/site';
+import { integrations } from '../../config/integrations';
+export function getStaticPaths() { return roles.filter((r) => r.status === 'open').map((r) => ({ params: { slug: r.slug }, props: { r } })); }
+const { r } = Astro.props;
+const d = (iso: string) => new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' }).format(new Date(iso + 'T12:00:00+05:30'));
+const mail = `mailto:${company.careersEmail}?subject=${encodeURIComponent(`Application: ${r.title} (${r.city})`)}&body=${encodeURIComponent(`Role: ${r.title}\nLocation: ${r.city}\n\nName:\nPhone:\nCurrent role and employer:\nNotice period:\n\nPlease attach your CV to this email.`)}`;
+const jsonld = [{ '@context': 'https://schema.org', '@type': 'JobPosting', title: r.title, description: r.summary + ' ' + r.duties.join('. ') + '.', datePosted: r.posted, employmentType: 'FULL_TIME', hiringOrganization: { '@id': ORIGIN + '/#organization', '@type': 'Organization', name: company.legalName }, jobLocation: { '@type': 'Place', address: { '@type': 'PostalAddress', addressLocality: r.city, addressCountry: 'IN' } }, ...(r.arrangement === 'Hybrid' ? {} : {}), directApply: false }];
+const upload = integrations.careersUpload.endpoint;
+---
+<Base title={`${r.title}, ${r.city}`} description={`${r.title} at Skylark Express in ${r.city} (${r.arrangement}). ${r.summary}`} jsonld={jsonld}>
+  <section class="page-hero">
+    <div class="wrap role">
+      <nav aria-label="Breadcrumb"><ol class="crumbs" role="list"><li><a href="/">Home</a></li><li><a href="/careers">Careers</a></li></ol></nav>
+      <p class="eyebrow">{r.team}</p>
+      <h1 class="display h-page">{r.title}</h1>
+      <dl class="spec" style="background:#fff;max-width:560px"><div><dt>Location</dt><dd>{r.city}</dd></div><div><dt>Arrangement</dt><dd>{r.arrangement}</dd></div><div><dt>Posted</dt><dd><time datetime={r.posted}>{d(r.posted)}</time></dd></div><div><dt>Status</dt><dd>Open on the dated list. Confirm with the careers team.</dd></div></dl>
+      <p class="lede">{r.summary}</p>
+      <div class="role-cols">
+        <div><h2 class="display h-2">What you will do</h2><ul>{r.duties.map((x) => <li>{x}</li>)}</ul></div>
+        <div><h2 class="display h-2">What we look for</h2><ul>{r.lookingFor.map((x) => <li>{x}</li>)}</ul></div>
+      </div>
+      <div class="apply" id="apply">
+        <h2 class="display h-2">Apply for this role</h2>
+        {upload ? (
+          <form action={upload} method="post" enctype="multipart/form-data" class="stack" style="--s:14px" data-upload>
+            <input type="hidden" name="role" value={r.slug} />
+            <div class="field"><label for="a-name">Your name</label><input class="input" id="a-name" name="name" autocomplete="name" required /></div>
+            <div class="field"><label for="a-email">Email</label><input class="input" id="a-email" name="email" type="email" autocomplete="email" required /></div>
+            <div class="field"><label for="a-cv">CV (PDF or Word, up to 5 MB)</label><input class="input" id="a-cv" name="cv" type="file" accept=".pdf,.doc,.docx,application/pdf" required aria-describedby="a-cv-e" /><p class="err" id="a-cv-e" role="alert" hidden></p></div>
+            <button class="btn btn-primary" type="submit">Send application</button>
+          </form>
+        ) : (
+          <>
+            <p>Applications for this role are received by email at <strong>{company.careersEmail}</strong>. The button opens a draft in your mail app with the role filled in. Attach your CV and press send there; nothing is sent from this page.</p>
+            <p class="cluster"><a class="btn btn-primary" href={mail}>Apply by email</a><a class="link-arrow" href="/careers">All open roles <span aria-hidden="true">→</span></a></p>
+          </>
+        )}
+      </div>
+    </div>
+  </section>
+  <script>
+    const f = document.querySelector<HTMLFormElement>('[data-upload]');
+    f?.addEventListener('submit', (e) => { const i = f.querySelector<HTMLInputElement>('input[type=file]')!, er = f.querySelector<HTMLElement>('.err')!; const file = i.files?.[0];
+      const bad = !file ? 'Choose your CV file.' : file.size > 5 * 1024 * 1024 ? 'The file is larger than 5 MB.' : !/\.(pdf|docx?)$/i.test(file.name) ? 'Upload a PDF or Word document.' : '';
+      if (bad) { e.preventDefault(); er.textContent = bad; er.hidden = false; i.setAttribute('aria-invalid', 'true'); i.focus(); } });
+  </script>
+</Base>
+<style>
+  .role{display:grid;gap:20px;max-width:960px}
+  .role-cols{display:grid;gap:28px}
+  @media (min-width:800px){.role-cols{grid-template-columns:1fr 1fr}}
+  .role-cols ul{padding-left:1.1em;margin:10px 0 0;display:grid;gap:8px}
+  .apply{background:#fff;border:1.5px solid var(--ink);padding:clamp(16px,3vw,28px);display:grid;gap:12px;scroll-margin-top:calc(var(--header-h) + 16px)}
+</style>

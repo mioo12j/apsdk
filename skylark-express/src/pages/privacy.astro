@@ -1,0 +1,29 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import { company } from '../data/company';
+import { integrations } from '../config/integrations';
+const m = integrations.forms.mode;
+---
+<Base title="Privacy" description="How the Skylark Express website handles the information you enter into its tracking, quote, PIN-code and contact tools.">
+  <PageHero eyebrow="Privacy" title="Privacy on this website" lede="This page describes what this website does with the information you enter. It reflects the forms and services built into the site." />
+  <section class="section-tight" style="padding-top:0"><div class="wrap prose">
+    <h2 class="display h-2">Who we are</h2>
+    <p>{company.legalName}, corporate headquarters at Sector 17–18 Divider Road, Sector 18, Gurugram, Haryana 122022. Privacy questions: <a href={`mailto:${company.email}`}>{company.email}</a>.</p>
+    <h2 class="display h-2">What you give us, and why</h2>
+    <ul>
+      <li><strong>Quote and contact forms.</strong> Service, pickup and destination, cargo description, and your name, company and phone or email. We use these only to review and answer your enquiry. {m === 'offline' ? 'In this build the forms prepare an email in your own mail app; the website itself does not transmit or store what you type.' : 'Enquiries are sent to our enquiry system over an encrypted connection.'}</li>
+      <li><strong>Tracking.</strong> The docket or air waybill (AWB) number you enter is used to look up the shipment. Public results show shipment status only. Proof-of-delivery documents are shown only after an authorisation check.</li>
+      <li><strong>PIN-code check.</strong> The PIN code you enter is used to answer the serviceability question.</li>
+      <li><strong>Careers.</strong> Applications are sent by you, by email, to {company.careersEmail}.</li>
+    </ul>
+    <h2 class="display h-2">Stored in your browser</h2>
+    <p>While you fill in the quote form, your entries are kept in your browser’s session storage so they survive moving back and forward. They are cleared when the request is accepted or when you close the tab. This site sets no advertising cookies.</p>
+    <h2 class="display h-2">Analytics and third parties</h2>
+    <p>This build loads no analytics or advertising scripts, and fonts, images and video are served from this site. Docket numbers and PIN codes are removed from the page address after they are read, so they do not appear in logs of page addresses. “Directions” links open Google Maps in a new tab; Google’s own privacy terms apply there.</p>
+    <p class="notice"><strong>Handoff note for the operator.</strong> If analytics, a customer portal, a forms provider or a tracking provider is connected at launch, name each vendor here, state the retention period, and have this page reviewed against the Digital Personal Data Protection Act, 2023 before publishing.</p>
+    <h2 class="display h-2">Your choices</h2>
+    <p>You may ask us what personal information we hold from your enquiry, and ask us to correct or delete it, by writing to <a href={`mailto:${company.email}`}>{company.email}</a>.</p>
+  </div></section>
+</Base>
+<style>.prose h2{margin-top:1.6em}.prose ul{padding-left:1.2em;display:grid;gap:10px}</style>
