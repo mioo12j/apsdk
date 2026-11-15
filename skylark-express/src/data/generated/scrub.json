@@ -1,0 +1,84 @@
+{
+ "fps": 12,
+ "chapters": [
+  {
+   "name": "Pickup",
+   "start": 0.0,
+   "shots": [
+    {
+     "start": 0.0,
+     "dur": 3.0,
+     "label": "Scanned at the counter"
+    },
+    {
+     "start": 3.0,
+     "dur": 3.0,
+     "label": "First mile"
+    }
+   ],
+   "end": 6.0
+  },
+  {
+   "name": "Hub",
+   "start": 6.0,
+   "shots": [
+    {
+     "start": 6.0,
+     "dur": 2.0,
+     "label": "Arrives at the hub"
+    },
+    {
+     "start": 8.0,
+     "dur": 2.833,
+     "label": "Counted and scanned"
+    },
+    {
+     "start": 10.833,
+     "dur": 2.833,
+     "label": "Staged for linehaul"
+    }
+   ],
+   "end": 13.667
+  },
+  {
+   "name": "Linehaul",
+   "start": 13.667,
+   "shots": [
+    {
+     "start": 13.667,
+     "dur": 4.167,
+     "label": "Road"
+    },
+    {
+     "start": 17.833,
+     "dur": 3.0,
+     "label": "Rail"
+    },
+    {
+     "start": 20.833,
+     "dur": 2.5,
+     "label": "Air"
+    },
+    {
+     "start": 23.333,
+     "dur": 3.0,
+     "label": "Air"
+    }
+   ],
+   "end": 26.333
+  },
+  {
+   "name": "Delivery",
+   "start": 26.333,
+   "shots": [
+    {
+     "start": 26.333,
+     "dur": 3.167,
+     "label": "Scanned by the recipient"
+    }
+   ],
+   "end": 29.5
+  }
+ ],
+ "duration": 29.5
+}

@@ -67,7 +67,8 @@ function show(s: number, focus = true) {
 next.addEventListener('click', () => { if (validate(step)) show(step + 1); });
 back.addEventListener('click', () => { summary.hidden = true; show(step - 1); });
 el('service').addEventListener('change', conditional);
-form.addEventListener('focusout', (e) => { const t = e.target as HTMLInputElement; if (t.getAttribute?.('aria-invalid') === 'true') { const errs = rules[step](); setErr(t.name, errs.find(([n]) => n === t.name)?.[1] || ''); } });
+// errors update while typing (not on blur: a blur-time layout shift can swallow the click on Continue)
+form.addEventListener('input', (e) => { const t = e.target as HTMLInputElement; if (t.getAttribute?.('aria-invalid') === 'true') { const errs = rules[step](); setErr(t.name, errs.find(([n]) => n === t.name)?.[1] || ''); } });
 form.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.target as HTMLElement).tagName === 'INPUT' && step < 2) { e.preventDefault(); next.click(); } });
 
 const collect = () => { const d: Record<string, string> = {}; for (const n of NAMES) if (el(n).value.trim()) d[n] = el(n).value.trim(); d.serviceName = (el('service') as any).selectedOptions[0].text; return d; };

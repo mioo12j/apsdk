@@ -19,6 +19,7 @@ if (dlg) {
   };
   const open = (el: HTMLElement) => {
     opener = el; dlg.showModal();
+    if (!v.querySelector('track')) { const t = document.createElement('track'); t.kind = 'captions'; t.srclang = 'en'; t.label = 'English'; t.src = '/media/the-handover.en.vtt'; t.default = true; v.append(t); } // captions are fetched with the film, not before
     v.muted = true; v.src = pick(); v.load(); v.play().catch(() => {}); sync(); toggle.focus();
   };
   const close = () => { v.pause(); v.removeAttribute('src'); v.load(); seek.value = '0'; time.textContent = '0:00 / 0:42'; opener?.focus(); };
@@ -28,7 +29,7 @@ if (dlg) {
   toggle.addEventListener('click', () => (v.paused ? v.play() : v.pause()));
   q('[data-film-replay]').addEventListener('click', () => { v.currentTime = 0; v.play(); });
   mute.addEventListener('click', () => { v.muted = !v.muted; sync(); });
-  cc.addEventListener('click', () => { const t = v.textTracks[0]; const on = t.mode !== 'showing'; t.mode = on ? 'showing' : 'hidden'; cc.setAttribute('aria-pressed', String(on)); });
+  cc.addEventListener('click', () => { const t = v.textTracks[0]; if (!t) return; const on = t.mode !== 'showing'; t.mode = on ? 'showing' : 'hidden'; cc.setAttribute('aria-pressed', String(on)); });
   seek.addEventListener('input', () => { v.currentTime = +seek.value; });
   v.addEventListener('timeupdate', () => { seek.value = String(v.currentTime); time.textContent = `${fmt(v.currentTime)} / 0:42`; });
   ['play', 'pause', 'ended', 'volumechange'].forEach((e) => v.addEventListener(e, sync));

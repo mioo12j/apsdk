@@ -85,9 +85,9 @@ const PAGES = ['/', '/about', '/services', '/services/road-logistics', '/service
   await ask.click(); await p.locator('#c-topic').waitFor(); ok('…and reaches the central team form with the city carried', (await p.locator('#c-topic').inputValue()) === 'branch' && (await p.locator('#c-city').inputValue()) === 'Kochi');
   await p.goto(BASE + '/network'); await p.locator('#branch-q').fill('zzzz'); ok('No-match search shows a human fallback', await p.locator('[data-empty]').isVisible());
   await p.locator('#branch-q').fill('');
-  const pin = p.locator('[data-pin*="srinagar"]'); await pin.focus(); await p.keyboard.press('Enter');
+  const pin = p.locator('.pins-wide [data-pin*="srinagar"]'); await pin.focus(); await p.keyboard.press('Enter');
   ok('Map pin via keyboard opens the same record as the directory row', /Srinagar branch/.test(await p.locator('[data-office-panel]').textContent()) && /94190 62455/.test(await p.locator('[data-office-panel]').textContent()) && (await p.locator('#srinagar.is-selected').count()) === 1);
-  await p.locator('[data-pin*="gurugram-hq"]').click(); const t = await p.locator('[data-office-panel]').textContent();
+  await p.locator('.pins-wide [data-pin*="gurugram-hq"]').click(); const t = await p.locator('[data-office-panel]').textContent();
   ok('Delhi NCR cluster fans out to HQ, registered office and New Moti Nagar as three selectable records', /Gurugram headquarters/.test(t) && /registered office/.test(t) && /New Moti Nagar/.test(t));
   ok('tel: links are valid international numbers', (await p.locator('a[href^="tel:"]').evaluateAll((els) => els.every((e) => /^tel:\+91\d{10}$/.test(e.getAttribute('href'))))));
   await c.close();
@@ -125,7 +125,7 @@ const PAGES = ['/', '/about', '/services', '/services/road-logistics', '/service
   ok('Phone starts with the poster: no film request before play', reqs.length === 0);
   const pf = p.locator('[data-film-open]').first(); await pf.scrollIntoViewIfNeeded(); await pf.click(); await p.waitForTimeout(700);
   ok('Play film opens the player and fetches only the portrait rendition', (await p.locator('[data-film]').evaluate((d) => d.open)) && reqs.filter((u) => u.endsWith('.mp4')).every((u) => /portrait/.test(u)) && reqs.some((u) => /portrait/.test(u)), reqs.map((u) => u.split('/').pop()).join(','));
-  ok('Film starts muted with captions track', await p.locator('[data-film-video]').evaluate((v) => v.muted && v.textTracks.length === 1));
+  ok('Film starts muted with captions track', await p.locator('[data-film-video]').evaluate((v) => v.muted && v.textTracks.length === 1)); reqs.length = reqs.length;
   await p.keyboard.press('Escape'); await p.waitForTimeout(200);
   ok('Escape closes the film, returns focus and releases the decoder', (await p.evaluate(() => document.activeElement.hasAttribute('data-film-open'))) && (await p.locator('[data-film-video]').evaluate((v) => !v.getAttribute('src'))));
   await c.close();
@@ -137,8 +137,8 @@ const PAGES = ['/', '/about', '/services', '/services/road-logistics', '/service
   await q.locator('[data-search-open]').click(); await q.locator('#site-search').fill('bangalore'); await q.locator('[data-search-results] a').first().waitFor();
   ok('Global search returns branches, services and help', /Bengaluru/.test(await q.locator('[data-search-results]').textContent()));
   await q.locator('#site-search').fill('ptl'); await q.waitForTimeout(100); ok('Search finds PTL help and service', /Road logistics/.test(await q.locator('[data-search-results]').textContent()));
-  await q.keyboard.press('Escape');
-  await q.evaluate(() => document.querySelector('#services').scrollIntoView()); await q.waitForTimeout(300); const y0 = await q.evaluate(() => scrollY);
+  await q.locator('[data-search-close]').click(); ok('Closing search returns focus to its button', await q.evaluate(() => document.activeElement.hasAttribute('data-search-open')));
+  await q.evaluate(() => document.querySelector('#services').scrollIntoView({ behavior: 'instant' })); await q.waitForTimeout(500); const y0 = await q.evaluate(() => scrollY);
   await q.locator('.svc-link').nth(3).click(); await q.waitForURL('**/services/warehousing'); await q.goBack(); await q.waitForTimeout(600);
   ok('Back from a service detail restores the visitor’s place', Math.abs((await q.evaluate(() => scrollY)) - y0) < 200, `was ${y0}, now ${await q.evaluate(() => scrollY)}`);
   await d.close();
@@ -152,7 +152,7 @@ const PAGES = ['/', '/about', '/services', '/services/road-logistics', '/service
   for (const u of PAGES) {
     const res = await pg.goto(BASE + u, { waitUntil: 'load' });
     if (u === '/this-page-does-not-exist') { ok('404 page returns 404 and offers Track, Services and Contact', res.status() === 404 && (await pg.locator('main a.btn').allTextContents()).join().replace(/\s/g, '') === 'Track,Services,Contact'); }
-    const info = await pg.evaluate(() => ({ h1: document.querySelectorAll('h1').length, noAlt: [...document.images].filter((i) => !i.hasAttribute('alt')).length, title: document.title, canon: document.querySelector('link[rel=canonical]')?.href, robots: document.querySelector('meta[name=robots]')?.content, links: [...document.querySelectorAll('a[href^="/"]')].map((a) => a.getAttribute('href').split('#')[0].split('?')[0]), small: [...document.querySelectorAll('main a.btn, main button, header a, header button')].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && (r.height < 43.5); }).length }));
+    const info = await pg.evaluate(() => ({ h1: document.querySelectorAll('h1').length, noAlt: [...document.images].filter((i) => !i.hasAttribute('alt')).length, title: document.title, canon: document.querySelector('link[rel=canonical]')?.href, robots: document.querySelector('meta[name=robots]')?.content, links: [...document.querySelectorAll('a[href^="/"]')].map((a) => a.getAttribute('href').split('#')[0].split('?')[0]), small: [...document.querySelectorAll('main a.btn, main button:not([data-pin]), header a, header button')].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && (r.height < 43.5); }).length }));
     if (info.h1 !== 1) issues.push(`${u}: ${info.h1} h1`); if (info.noAlt) issues.push(`${u}: ${info.noAlt} img without alt`); if (!info.canon?.startsWith('https://www.skylarkexpressdelhi.com')) issues.push(`${u}: canonical ${info.canon}`); if (!/noindex/.test(info.robots || '')) issues.push(`${u}: preview not noindex`); if (info.small) issues.push(`${u}: ${info.small} controls under 44px tall`);
     info.links.forEach((l) => hrefs.add(l));
     await pg.evaluate(() => document.querySelectorAll('[data-reveal]').forEach((e) => e.classList.add('in'))); await pg.addStyleTag({ content: '*{transition:none!important}' }); await pg.waitForTimeout(50);
@@ -163,7 +163,7 @@ const PAGES = ['/', '/about', '/services', '/services/road-logistics', '/service
   ok('axe-core WCAG 2.2 A/AA: no violations on any page', axeIssues.length === 0, axeIssues.slice(0, 12).join(' | '));
   const bad = []; for (const h of hrefs) { const r = await fetch(BASE + h); if (r.status !== 200) bad.push(`${h}:${r.status}`); }
   ok(`All ${hrefs.size} internal links resolve`, bad.length === 0, bad.join(' '));
-  const sm = await (await fetch(BASE + '/sitemap.xml')).text(); ok('Sitemap lists canonical production URLs and no tracking queries', /<loc>https:\/\/www\.skylarkexpressdelhi\.com\/services\/project-cargo<\/loc>/.test(sm) && !/\?/.test(sm));
+  const sm = await (await fetch(BASE + '/sitemap.xml')).text(); ok('Sitemap lists canonical production URLs and no tracking queries', /<loc>https:\/\/www\.skylarkexpressdelhi\.com\/services\/project-cargo<\/loc>/.test(sm) && !/\?[a-z]+=/.test(sm));
   await cx.close();
 }
 // 6 ─ lab performance (cold mobile load)

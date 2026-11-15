@@ -1,7 +1,7 @@
 ---
 // India network map. Boundaries are rendered from the checked vector geometry in
 // src/data/generated/india-map.json (see map-src/ and scripts/build-map.mjs) — never from generated imagery.
-import { map, markers, hqPoint } from '../data/mapgeo';
+import { map, markers, markersNarrow, hqPoint } from '../data/mapgeo';
 interface Props { id?: string; routes?: boolean; theme?: 'dark' | 'paper' }
 const { id = 'india-map', routes = true, theme = 'dark' } = Astro.props;
 const W = map.width, H = map.height;
@@ -29,18 +29,22 @@ const lak = map.dots[map.dots.length - 9], an = map.dots[map.dots.length - 6];
       <g transform={`translate(${W - 54},54)`}><path d="M0,-26 L7,0 L0,-5 L-7,0 Z" /><text y="18" text-anchor="middle">N</text></g>
     </g>
   </svg>
-  <div class="pins">
-    {markers.map((m) => (
-      <button type="button" class:list={['pin', { hq: m.hq, cluster: m.members.length > 1, city: !m.published }]} style={`left:${(m.x / W) * 100}%;top:${(m.y / H) * 100}%`}
-        data-pin={m.id} aria-label={`${m.label}${m.published ? '' : ' (city location)'}`} aria-pressed="false">
-        <span class="dot" aria-hidden="true">{m.members.length > 1 ? m.members.length : ''}</span>
-        {m.hq && <span class="pin-label" aria-hidden="true">Gurugram HQ</span>}
-      </button>
-    ))}
-  </div>
+  {[['wide', markers], ['narrow', markersNarrow]].map(([scale, list]) => (
+    <div class={`pins pins-${scale}`}>
+      {(list as typeof markers).map((m) => (
+        <button type="button" class:list={['pin', { hq: m.hq, cluster: m.members.length > 1, city: !m.published }]} style={`left:${(m.x / W) * 100}%;top:${(m.y / H) * 100}%`}
+          data-pin={m.id} aria-label={`${m.label}${m.published ? '' : ' (city location)'}`} aria-pressed="false">
+          <span class="dot" aria-hidden="true">{m.members.length > 1 ? m.members.length : ''}</span>
+          {m.hq && <span class="pin-label" aria-hidden="true">Gurugram HQ</span>}
+        </button>
+      ))}
+    </div>
+  ))}
 </div>
 <style>
-  .imap{position:relative;width:100%;max-width:640px;margin-inline:auto;aspect-ratio:1000/1151}
+  .imap{position:relative;width:100%;max-width:640px;margin-inline:auto;aspect-ratio:1000/1151;container-type:inline-size}
+  .pins-narrow{display:none}
+  @container (max-width:479px){.pins-wide{display:none}.pins-narrow{display:block}}
   .imap svg{width:100%;height:100%;overflow:visible}
   .dots circle{fill:var(--cyan);opacity:.5}
   .paper .dots circle{fill:var(--link);opacity:.42}
@@ -55,7 +59,7 @@ const lak = map.dots[map.dots.length - 9], an = map.dots[map.dots.length - 6];
   .isl path{fill:var(--muted-dark)}
   .paper .isl text{fill:var(--muted)} .paper .isl path{fill:var(--muted)}
   .pins{position:absolute;inset:0}
-  .pin{position:absolute;transform:translate(-50%,-50%);width:44px;height:44px;border:0;background:none;padding:0;display:grid;place-items:center;border-radius:50%}
+  .pin{position:absolute;transform:translate(-50%,-50%);width:26px;height:26px;border:0;background:none;padding:0;display:grid;place-items:center;border-radius:50%}
   .pin .dot{display:grid;place-items:center;min-width:14px;height:14px;border-radius:50%;background:var(--paper);border:2px solid var(--navy);font:700 11px/1 var(--body);color:var(--navy);transition:transform .2s var(--ease),background-color .2s}
   .pin.city .dot{background:var(--navy);border-color:var(--cyan);min-width:11px;height:11px}
   .paper .pin.city .dot{background:var(--paper);border-color:var(--link)}
@@ -63,9 +67,9 @@ const lak = map.dots[map.dots.length - 9], an = map.dots[map.dots.length - 6];
   .pin.cluster .dot{min-width:22px;height:22px;padding:0 4px}
   .pin.hq .dot{background:var(--citron);border-color:var(--navy);min-width:26px;height:26px;color:var(--ink);box-shadow:0 0 0 5px rgba(213,239,68,.28)}
   .pin:hover .dot,.pin[aria-pressed="true"] .dot{transform:scale(1.35);background:var(--citron);color:var(--ink);border-color:var(--navy)}
-  .pin:focus-visible{outline:3px solid var(--citron);outline-offset:-6px}
+  .pin:focus-visible{outline:3px solid var(--citron);outline-offset:2px}
   .paper .pin:focus-visible{outline-color:var(--link)}
-  .pin-label{position:absolute;left:calc(50% + 20px);top:50%;transform:translateY(-50%);white-space:nowrap;font:600 .75rem/1 var(--body);letter-spacing:.06em;text-transform:uppercase;background:var(--citron);color:var(--ink);padding:5px 8px;border-radius:3px;pointer-events:none}
+  .pin-label{position:absolute;left:calc(50% + 22px);top:50%;transform:translateY(-50%);white-space:nowrap;font:600 .75rem/1 var(--body);letter-spacing:.06em;text-transform:uppercase;background:var(--citron);color:var(--ink);padding:5px 8px;border-radius:3px;pointer-events:none}
   @media (prefers-reduced-motion:no-preference){
     :global(.js) .imap[data-anim] .dots circle{opacity:0;transition:opacity .5s var(--ease) var(--dd)}
     :global(.js) .imap[data-anim] .outline{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 2.2s var(--ease) .1s}

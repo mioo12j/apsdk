@@ -13,6 +13,7 @@ import heroMobile from '../assets/img/hero-45-gen.jpg';
 import { company, figures } from '../data/company';
 import { services } from '../data/services';
 import { offices } from '../data/offices';
+import scrub from '../data/generated/scrub.json';
 
 // Art-directed hero poster: 16:9 first frame of the truck take on wide screens, 4:5 dispatch poster on phones.
 const mk = async (src: ImageMetadata, ws: number[], format: 'avif' | 'webp' | 'jpeg', quality: number) =>
@@ -90,31 +91,40 @@ const published = offices.filter((o) => o.kind !== 'city').length, listed = offi
     </div>
   </section>
 
-  <!-- 03 · Follow a consignment -->
+  <!-- 03 · Follow a consignment — scroll plays the footage -->
   <section class="journey dark" id="journey" aria-labelledby="journey-h" data-journey>
+    <script is:inline>
+      /* size the scroll sequence before first layout so Back/forward restores the visitor's place */
+      (function(){var c=navigator.connection||{};if(!matchMedia('(prefers-reduced-motion:reduce)').matches&&!c.saveData&&!/(^|-)2g/.test(c.effectiveType||'')&&innerHeight>=520)document.currentScript.parentElement.classList.add('is-cine')})();
+    </script>
     <div class="j-sticky">
-      <div class="wrap grid j-grid">
-        <div class="j-copy">
+      <div class="j-stage" aria-hidden="true">
+        {journey.map((s, i) => <div class:list={['j-frame', { on: i === 0 }]} data-frame={i}><Pic name={s.img} alt="" ratio={16 / 9} widths={[800, 1200, 1600]} sizes="100vw" /></div>)}
+        <video class="j-video" muted playsinline preload="none" tabindex="-1" disablepictureinpicture data-journey-video></video>
+        <div class="j-shade"></div>
+      </div>
+      <div class="wrap j-ui">
+        <div class="j-head">
           <p class="eyebrow">Follow a consignment</p>
           <h2 class="display h-1" id="journey-h">Four handovers. One docket.</h2>
           <p class="small j-meta"><span class="tag example">Illustrative example</span> <a class="j-skip" href="#services">Skip shipment journey</a></p>
-          <ol class="j-steps" role="list">
-            {journey.map((s, i) => (
-              <li class:list={['j-step', { on: i === 0 }]} data-step={i}>
-                <figure class="j-still"><Pic name={s.img} alt={s.alt} ratio={16 / 9} widths={[480, 800]} sizes="92vw" /></figure>
-                <div>
-                  <h3 class="display h-2"><span class="mono j-n">0{i + 1}</span>{s.k}</h3>
-                  <p>{s.text}</p>
-                  <p class="mono small j-ev">EXAMPLE-1004 · {s.ev}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
         </div>
-        <div class="j-stage" aria-hidden="true">
-          {journey.map((s, i) => <div class:list={['j-frame', { on: i === 0 }]} data-frame={i}><Pic name={s.img} alt="" ratio={16 / 9} widths={[800, 1200]} sizes="(min-width:1024px) 56vw, 0px" /></div>)}
-          <video class="j-video" muted playsinline preload="none" tabindex="-1" data-journey-video></video>
-          <div class="j-rail"><span class="j-fill" data-journey-fill></span>{journey.map((s, i) => <span class="j-node" style={`left:${(i / 3) * 100}%`}><b>{s.k}</b></span>)}</div>
+        <ol class="j-steps" role="list">
+          {journey.map((s, i) => (
+            <li class:list={['j-step', { on: i === 0 }]} data-step={i}>
+              <figure class="j-still"><Pic name={s.img} alt={s.alt} ratio={16 / 9} widths={[480, 800]} sizes="92vw" /></figure>
+              <div class="j-text">
+                <h3 class="display"><span class="mono j-n">0{i + 1}</span>{s.k}</h3>
+                <p>{s.text}</p>
+                <p class="mono small j-ev">EXAMPLE-1004 · {s.ev}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+        <div class="j-foot" aria-hidden="true">
+          <p class="j-shot"><span data-journey-shot>Scanned at the counter</span></p>
+          <div class="j-rail"><span class="j-fill" data-journey-fill></span>{scrub.chapters.map((c) => <span class="j-node" style={`left:${(c.start / scrub.duration) * 100}%`}><b>{c.name}</b></span>)}<span class="j-node end" style="left:100%"></span></div>
+          <p class="j-hint"><span class="j-mouse"></span>Scroll to follow the carton</p>
         </div>
       </div>
     </div>
@@ -298,43 +308,55 @@ const published = offices.filter((o) => o.kind !== 'city').length, listed = offi
   }
   /* ── journey ── */
   .journey{position:relative;padding-block:clamp(64px,9vw,120px)}
-  .j-copy{grid-column:1/-1;display:grid;gap:16px;align-content:start}
+  .j-stage,.j-foot{display:none}
+  .j-head{display:grid;gap:16px}
   .j-meta{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
   .j-skip{display:none;min-height:44px;align-items:center}
-  .j-steps{display:grid;gap:32px;margin-top:12px}
+  .j-steps{display:grid;gap:32px;margin-top:28px}
   .j-step{display:grid;gap:14px}
-  .j-step h3{display:flex;align-items:baseline;gap:12px}
+  .j-step h3{display:flex;align-items:baseline;gap:12px;font-size:clamp(1.75rem,1.35rem + 1.7vw,2.75rem);line-height:1}
   .j-n{font-size:.8125rem;color:var(--navy);background:var(--citron);padding:3px 7px;border-radius:3px;font-weight:600;transform:translateY(-4px)}
   .j-ev{color:var(--cyan);margin-top:8px}
   .j-still :global(img){width:100%;display:block}
-  .j-stage{display:none}
-  @media (min-width:1024px){
-    .j-copy{grid-column:1/5}
-    .j-still{display:none}
-    .j-stage{display:block;grid-column:5/13;position:relative;align-self:center;aspect-ratio:16/10;background:var(--petrol);overflow:hidden}
-    .j-frame{position:absolute;inset:0;opacity:0;transition:opacity .5s var(--ease)}
-    .j-frame.on{opacity:1}
-    .j-frame :global(img){width:100%;height:100%;object-fit:cover}
-    .j-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s}
-    .j-video.on{opacity:1}
-    .j-rail{position:absolute;left:28px;right:28px;bottom:26px;height:2px;background:rgba(246,244,238,.35)}
-    .j-fill{position:absolute;inset:0;background:var(--citron);transform-origin:left;transform:scaleX(var(--jp,0))}
-    .j-node{position:absolute;top:-5px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:var(--navy);border:2px solid var(--paper)}
-    .j-node b{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);font:600 .6875rem var(--body);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;text-shadow:0 1px 8px rgba(4,14,20,.9)}
-    .j-node:first-of-type b{left:0;transform:none}.j-node:last-of-type b{left:auto;right:0;transform:none}
-    .j-stage::after{content:"";position:absolute;inset:auto 0 0 0;height:30%;background:linear-gradient(to top,rgba(4,14,20,.7),transparent);pointer-events:none}
-    .j-rail{z-index:2}
-  }
-  @media (min-width:1024px) and (min-height:700px) and (prefers-reduced-motion:no-preference){
-    :global(.js) .journey{height:420vh;padding-block:0}
-    :global(.js) .j-sticky{position:sticky;top:var(--header-h);height:calc(100vh - var(--header-h));display:grid;align-items:center;overflow:hidden}
-    :global(.js) .j-skip{display:inline-flex}
-    :global(.js) .j-steps{gap:6px}
-    :global(.js) .j-step{opacity:.38;transition:opacity .35s var(--ease),padding .35s var(--ease);padding:8px 0 8px 18px;border-left:2px solid var(--rule-dark)}
-    :global(.js) .j-step p{display:none}
-    :global(.js) .j-step.on{opacity:1;border-left-color:var(--citron);padding-block:14px}
-    :global(.js) .j-step.on p{display:block}
-    :global(.js) .j-stage{aspect-ratio:16/9;max-height:72vh;justify-self:end;width:min(100%,calc(72vh*16/9))}
+  @media (min-width:900px){.journey:not(.is-cine) .j-steps{grid-template-columns:1fr 1fr;gap:40px 24px}}
+  /* cinematic mode: set by home.ts when motion and data settings allow it */
+  .journey.is-cine{height:820vh;padding-block:0}
+  .is-cine .j-sticky{position:sticky;top:var(--header-h);height:calc(100svh - var(--header-h));overflow:hidden}
+  .is-cine .j-stage{display:block;position:absolute;inset:0}
+  .is-cine .j-frame{position:absolute;inset:0;opacity:0;transition:opacity .5s var(--ease)}
+  .is-cine .j-frame.on{opacity:1}
+  .is-cine .j-frame :global(picture){display:block;height:100%}
+  .is-cine .j-frame :global(img){width:100%;height:100%;object-fit:cover}
+  .is-cine .j-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s var(--ease);transform:scale(var(--jz,1.02))}
+  .is-cine .j-video.on{opacity:1}
+  .is-cine .j-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(11,32,44,.9) 0%,rgba(11,32,44,.55) 34%,rgba(11,32,44,0) 62%),linear-gradient(0deg,rgba(4,14,20,.85) 0%,rgba(4,14,20,0) 34%),linear-gradient(180deg,rgba(4,14,20,.55) 0%,rgba(4,14,20,0) 22%)}
+  .is-cine .j-ui{position:relative;height:100%;display:grid;grid-template-rows:auto 1fr auto;padding-block:clamp(20px,4vh,48px) clamp(16px,3vh,32px);gap:12px}
+  .is-cine .j-head{gap:10px;max-width:520px}
+  .is-cine .j-head .h-1{font-size:clamp(1.75rem,1.2rem + 2.2vw,3.25rem)}
+  .is-cine .j-skip{display:inline-flex}
+  .is-cine .j-still{display:none}
+  .is-cine .j-steps{display:block;position:relative;margin:0;align-self:end;max-width:560px;min-height:11.5rem}
+  .is-cine .j-step{position:absolute;left:0;right:0;bottom:0;opacity:0;transform:translateY(22px);transition:opacity .45s var(--ease),transform .45s var(--ease);pointer-events:none;border-left:3px solid var(--citron);padding-left:18px}
+  .is-cine .j-step.on{opacity:1;transform:none;pointer-events:auto}
+  .is-cine .j-step h3{font-size:clamp(2.75rem,2rem + 4.5vw,6rem);line-height:.92;margin-bottom:10px}
+  .is-cine .j-step p{max-width:46ch;text-shadow:0 1px 14px rgba(4,14,20,.8)}
+  .is-cine .j-foot{display:grid;gap:12px}
+  .j-shot{font:600 .8125rem/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--citron);min-height:1em}
+  .j-rail{position:relative;height:2px;background:rgba(246,244,238,.35);margin:22px 6px 4px}
+  .j-fill{position:absolute;inset:0;background:var(--citron);transform-origin:left;transform:scaleX(var(--jp,0))}
+  .j-node{position:absolute;top:-5px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:var(--navy);border:2px solid var(--paper)}
+  .j-node b{position:absolute;bottom:14px;left:0;font:600 .6875rem var(--body);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;text-shadow:0 1px 8px rgba(4,14,20,.9)}
+  .j-node.end{background:var(--citron);border-color:var(--navy)}
+  .j-hint{display:flex;align-items:center;gap:10px;font-size:.8125rem;color:var(--muted-dark);transition:opacity .4s}
+  .journey[data-moved] .j-hint{opacity:0}
+  .j-mouse{width:16px;height:26px;border:1.5px solid currentColor;border-radius:9px;position:relative}
+  .j-mouse::after{content:"";position:absolute;left:50%;top:5px;width:2px;height:6px;margin-left:-1px;background:var(--citron);border-radius:1px;animation:jm 1.6s var(--ease) infinite}
+  @keyframes jm{0%{transform:translateY(0);opacity:1}80%,100%{transform:translateY(9px);opacity:0}}
+  @media (max-width:767px){
+    .is-cine .j-shade{background:linear-gradient(0deg,rgba(4,14,20,.92) 0%,rgba(4,14,20,.5) 38%,rgba(4,14,20,0) 60%),linear-gradient(180deg,rgba(4,14,20,.8) 0%,rgba(4,14,20,0) 26%)}
+    .is-cine .j-head .eyebrow{display:none}
+    .is-cine .j-steps{min-height:13rem}
+    .is-cine .j-node b{font-size:.625rem;letter-spacing:.06em}
   }
   /* ── services ── */
   .svc-head{display:grid;gap:14px;margin-bottom:clamp(28px,4vw,56px)}

@@ -1,4 +1,5 @@
 // Home page motion layer. Everything here is enhancement: the page reads and works without it.
+import scrub from '../data/generated/scrub.json';
 const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
 const conn = (navigator as any).connection;
 const saveData = !!conn?.saveData || /(^|-)2g/.test(conn?.effectiveType || '');
@@ -29,23 +30,46 @@ const steps = Array.from(document.querySelectorAll<HTMLElement>('[data-step]'));
 const frames = Array.from(document.querySelectorAll<HTMLElement>('[data-frame]'));
 const fill = document.querySelector<HTMLElement>('[data-journey-fill]');
 const par = Array.from(document.querySelectorAll<HTMLElement>('[data-parallax]'));
-const pinnedMQ = matchMedia('(min-width:1024px) and (min-height:700px) and (prefers-reduced-motion:no-preference)');
 const clamp = (n: number, a = 0, b = 1) => Math.min(b, Math.max(a, n));
-let jReady = false, jStep = -1, jTarget = 0, jSeeking = false;
-const J_SEG = [2.5, 2.5, 3.0, 2.5], J_TOTAL = 10.5;
-
-if (jv && !reduce && !saveData) {
-  // fetch the scrub clip only when the sequence approaches, and only where it will be pinned
-  const io = new IntersectionObserver((es) => {
-    if (es.some((e) => e.isIntersecting) && pinnedMQ.matches) {
-      io.disconnect(); jv.src = '/media/journey-scrub.mp4'; jv.load();
-      jv.addEventListener('loadeddata', () => { jReady = true; jv.classList.add('on'); jv.pause(); tick(); }, { once: true });
-      jv.addEventListener('seeked', () => { jSeeking = false; if (Math.abs(jv.currentTime - jTarget) > 0.06) seek(); });
-    }
-  }, { rootMargin: '120% 0px' });
-  if (journey) io.observe(journey);
+// 03 · cinematic journey: scrolling plays the footage. Enabled unless the visitor asks for less motion or data.
+const DUR = scrub.duration, CH = scrub.chapters;
+const SHOTS = CH.flatMap((c) => c.shots);
+const shotEl = document.querySelector<HTMLElement>('[data-journey-shot]');
+const cine = !!journey && !!jv && journey.classList.contains('is-cine'); // decided by the inline script beside the section
+let jReady = false, jStep = -1, jShot = -1, jTarget = 0, jCur = 0, jSeeking = false, jActive = false, jRaf = 0;
+if (cine) {
+  const portrait = innerWidth < 820 && innerHeight > innerWidth;
+  const io = new IntersectionObserver((es) => { // fetch the footage only as the sequence approaches
+    if (!es.some((e) => e.isIntersecting)) return; io.disconnect();
+    jv!.src = portrait ? '/media/journey-scrub-portrait.mp4' : '/media/journey-scrub-landscape.mp4'; jv!.load();
+    jv!.addEventListener('loadeddata', () => { jReady = true; jv!.pause(); jv!.classList.add('on'); }, { once: true });
+    jv!.addEventListener('seeked', () => { jSeeking = false; });
+  }, { rootMargin: '150% 0px' });
+  io.observe(journey!);
+  new IntersectionObserver((es) => { jActive = es[0].isIntersecting; if (jActive && !jRaf) jRaf = requestAnimationFrame(jLoop); }).observe(journey!);
 }
-function seek() { if (!jv || jSeeking) return; jSeeking = true; jv.currentTime = jTarget; }
+function jLoop() { // ease the playhead towards the scroll position so the footage glides rather than jumps
+  jRaf = 0; if (!jActive) return;
+  const d = jTarget - jCur;
+  if (Math.abs(d) > 0.004) {
+    jCur += d * 0.16;
+    if (jReady && jv && !jSeeking && Math.abs(jv.currentTime - jCur) > 0.035) { jSeeking = true; jv.currentTime = jCur; }
+  }
+  jRaf = requestAnimationFrame(jLoop);
+}
+function journeyTick(vh: number) {
+  if (!cine) return;
+  const r = journey!.getBoundingClientRect(); const span = r.height - (vh - 72);
+  const p = clamp(-r.top / span);
+  jTarget = Math.min(DUR - 0.09, p * DUR);
+  if (p > 0.01) journey!.setAttribute('data-moved', '');
+  const idx = Math.max(0, CH.findIndex((c) => jTarget < c.end));
+  if (idx !== jStep) { jStep = idx; steps.forEach((s, i) => s.classList.toggle('on', i === idx)); frames.forEach((f, i) => f.classList.toggle('on', i === idx)); }
+  const si = SHOTS.findIndex((s) => jTarget < s.start + s.dur);
+  if (si !== jShot && shotEl) { jShot = si; shotEl.textContent = SHOTS[Math.max(0, si)].label; }
+  fill?.style.setProperty('--jp', p.toFixed(4));
+  jv?.style.setProperty('--jz', (1.02 + 0.03 * Math.sin(p * Math.PI)).toFixed(4));
+}
 
 function tick() {
   const vh = innerHeight;
@@ -56,16 +80,7 @@ function tick() {
   }
   if (!reduce) for (const s of routes) { const r = s.getBoundingClientRect(); s.style.setProperty('--p', clamp((vh * 0.62 - r.top) / r.height).toFixed(4)); }
   if (!reduce) for (const el of par) { const r = el.parentElement!.getBoundingClientRect(); const p = clamp((vh - r.top) / (vh + r.height)); el.style.transform = `translate3d(0,${((p - 0.5) * 10).toFixed(2)}%,0)`; }
-  if (journey && pinnedMQ.matches) {
-    const r = journey.getBoundingClientRect(); const p = clamp(-r.top / (r.height - vh + 72));
-    const idx = Math.min(3, Math.floor(p * 4));
-    if (idx !== jStep) { jStep = idx; steps.forEach((s, i) => s.classList.toggle('on', i === idx)); frames.forEach((f, i) => f.classList.toggle('on', i === idx)); }
-    fill?.style.setProperty('--jp', p.toFixed(4));
-    if (jReady && jv) { // map progress → time inside the matching chapter of the scrub clip
-      const local = p * 4 - idx; let t0 = 0; for (let i = 0; i < idx; i++) t0 += J_SEG[i];
-      jTarget = Math.min(J_TOTAL - 0.05, t0 + clamp(local) * (J_SEG[idx] - 0.09)); seek();
-    }
-  } else if (jStep !== -2) { jStep = -2; steps.forEach((s) => s.classList.add('on')); }
+  journeyTick(vh);
 }
 let raf = 0;
 const onScroll = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; tick(); }); };
