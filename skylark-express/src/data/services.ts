@@ -1,5 +1,6 @@
 // SERVICES — six service lines. Each record drives /services, its detail page, the quote form and search.
 export type Service = {
+  seoTitle?: string;
   slug: string; name: string; short: string; index: string; image: string; imageAlt: string;
   lede: string; selector: string; summary: string;
   body: { heading: string; text: string }[];
@@ -11,7 +12,7 @@ export type Service = {
 };
 export const services: Service[] = [
   {
-    slug: 'road-logistics', name: 'Road logistics', short: 'Road', index: '01', image: 'road', diagram: 'ftl-ptl',
+    slug: 'road-logistics', seoTitle: 'FTL & PTL Road Freight Transport in India', name: 'Road logistics', short: 'Road', index: '01', image: 'road', diagram: 'ftl-ptl',
     imageAlt: 'A Skylark Express truck with a white container body on an Indian national highway in early morning light',
     selector: 'I have a full or partial truck load',
     summary: 'Full Truck Load and Part Truck Load movement, with first- and last-mile collection.',
@@ -37,7 +38,7 @@ export const services: Service[] = [
     ],
   },
   {
-    slug: 'railway-logistics', name: 'Railway logistics', short: 'Rail', index: '02', image: 'rail', diagram: 'rail',
+    slug: 'railway-logistics', seoTitle: 'Rail Freight Logistics: Road–Rail–Road', name: 'Railway logistics', short: 'Rail', index: '02', image: 'rail', diagram: 'rail',
     imageAlt: 'A Skylark-labelled pallet waits on a goods platform as a freight train passes at an Indian railway siding',
     selector: 'I ship smaller consignments on a regular lane',
     summary: 'A rail leg between cities, with road pickup and final delivery at each end.',
@@ -62,7 +63,7 @@ export const services: Service[] = [
     ],
   },
   {
-    slug: 'air-logistics', name: 'Air logistics', short: 'Air', index: '03', image: 'air', diagram: 'air',
+    slug: 'air-logistics', seoTitle: 'Domestic Air Cargo Services in India', name: 'Air logistics', short: 'Air', index: '03', image: 'air', diagram: 'air',
     imageAlt: 'A pallet in Skylark wrap is raised on a high-loader to the open cargo door of a freighter aircraft before sunrise',
     selector: 'It has to arrive by a fixed time',
     summary: 'Domestic air cargo for urgent or scheduled consignments, with carrier coordination.',
@@ -86,7 +87,7 @@ export const services: Service[] = [
     ],
   },
   {
-    slug: 'warehousing', name: 'Warehousing', short: 'Warehousing', index: '04', image: 'warehouse', diagram: 'warehouse',
+    slug: 'warehousing', seoTitle: 'Warehousing & Distribution in India', name: 'Warehousing', short: 'Warehousing', index: '04', image: 'warehouse', diagram: 'warehouse',
     imageAlt: 'Looking straight down a racking aisle in a warehouse as a reach truck lifts a pallet',
     selector: 'I need storage or distribution',
     summary: 'Contract, shared and project warehousing with inventory reporting.',
@@ -112,7 +113,7 @@ export const services: Service[] = [
     ],
   },
   {
-    slug: 'project-cargo', name: 'Project cargo', short: 'Project cargo', index: '05', image: 'project', diagram: 'odc',
+    slug: 'project-cargo', seoTitle: 'Project Cargo & ODC Transport in India', name: 'Project cargo', short: 'Project cargo', index: '05', image: 'project', diagram: 'odc',
     imageAlt: 'A low-loader trailer carries a secured steel pressure vessel while two supervisors stand beside the trailer wheels',
     selector: 'My equipment is oversized',
     summary: 'Over-dimensional cargo with route surveys, permits and supervised movement.',
@@ -139,7 +140,7 @@ export const services: Service[] = [
     ],
   },
   {
-    slug: 'packaging', name: 'Packaging', short: 'Packaging', index: '06', image: 'packaging', diagram: 'packaging',
+    slug: 'packaging', seoTitle: 'Industrial & Export Packaging Services', name: 'Packaging', short: 'Packaging', index: '06', image: 'packaging', diagram: 'packaging',
     imageAlt: 'Close view of a timber crate corner with a steel protector, corrugated board, protective film and a roll of Skylark packing tape',
     selector: 'My goods need protective or specialist packing',
     summary: 'Eight packaging categories, from temperature-controlled air packs to CKD crating.',
@@ -164,7 +165,7 @@ export const services: Service[] = [
       { step: 'Specify', text: 'Material and method agreed; acceptance confirmed.' },
       { step: 'Pack', text: 'Packed, sealed and labelled for the mode of transport.' },
     ],
-    spec: [['Categories', 'Eight'], ['Materials', 'Wood, paperboard, plastic, film'], ['Specialist', 'Temperature, DG, CKD, VCI'], ['Acceptance', 'Confirmed per shipment']],
+    spec: [['Categories', 'Eight categories'], ['Materials', 'Wood, paperboard, plastic, film'], ['Specialist', 'Temperature, DG, CKD, VCI'], ['Acceptance', 'Confirmed per shipment']],
     enquiry: [
       { id: 'fragility', label: 'How fragile is it?', hint: 'For example, glass panels, calibrated instruments' },
       { id: 'size', label: 'Size and weight' },

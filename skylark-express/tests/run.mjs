@@ -138,8 +138,8 @@ const PAGES = ['/', '/about', '/services', '/services/road-logistics', '/service
   ok('Global search returns branches, services and help', /Bengaluru/.test(await q.locator('[data-search-results]').textContent()));
   await q.locator('#site-search').fill('ptl'); await q.waitForTimeout(100); ok('Search finds PTL help and service', /Road logistics/.test(await q.locator('[data-search-results]').textContent()));
   await q.locator('[data-search-close]').click(); ok('Closing search returns focus to its button', await q.evaluate(() => document.activeElement.hasAttribute('data-search-open')));
-  await q.evaluate(() => document.querySelector('#services').scrollIntoView({ behavior: 'instant' })); await q.waitForTimeout(500); const y0 = await q.evaluate(() => scrollY);
-  await q.locator('.svc-link').nth(3).click(); await q.waitForURL('**/services/warehousing'); await q.goBack(); await q.waitForTimeout(600);
+  await q.locator('.lift').nth(3).scrollIntoViewIfNeeded(); await q.waitForTimeout(500); const y0 = await q.evaluate(() => scrollY);
+  await q.locator('.lift').nth(3).click(); await q.waitForURL('**/services/warehousing'); await q.goBack(); await q.waitForTimeout(600);
   ok('Back from a service detail restores the visitor’s place', Math.abs((await q.evaluate(() => scrollY)) - y0) < 200, `was ${y0}, now ${await q.evaluate(() => scrollY)}`);
   await d.close();
   const sizes = [[360, 740], [390, 844], [768, 1024], [844, 390], [1280, 720], [1440, 900], [1920, 1080], [640, 360]]; // last = 1280×720 at 200% zoom

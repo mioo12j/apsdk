@@ -8,10 +8,10 @@ export function getStaticPaths() { return roles.filter((r) => r.status === 'open
 const { r } = Astro.props;
 const d = (iso: string) => new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' }).format(new Date(iso + 'T12:00:00+05:30'));
 const mail = `mailto:${company.careersEmail}?subject=${encodeURIComponent(`Application: ${r.title} (${r.city})`)}&body=${encodeURIComponent(`Role: ${r.title}\nLocation: ${r.city}\n\nName:\nPhone:\nCurrent role and employer:\nNotice period:\n\nPlease attach your CV to this email.`)}`;
-const jsonld = [{ '@context': 'https://schema.org', '@type': 'JobPosting', title: r.title, description: r.summary + ' ' + r.duties.join('. ') + '.', datePosted: r.posted, employmentType: 'FULL_TIME', hiringOrganization: { '@id': ORIGIN + '/#organization', '@type': 'Organization', name: company.legalName }, jobLocation: { '@type': 'Place', address: { '@type': 'PostalAddress', addressLocality: r.city, addressCountry: 'IN' } }, ...(r.arrangement === 'Hybrid' ? {} : {}), directApply: false }];
+const jsonld = [{ '@context': 'https://schema.org', '@type': 'JobPosting', title: r.title, description: r.summary + ' ' + r.duties.join('. ') + '.', datePosted: r.posted, employmentType: 'FULL_TIME', validThrough: '2027-01-31T23:59:00+05:30', ...(r.arrangement === 'Hybrid' ? { jobLocationType: 'TELECOMMUTE', applicantLocationRequirements: { '@type': 'Country', name: 'India' } } : {}), hiringOrganization: { '@id': ORIGIN + '/#organization', '@type': 'Organization', name: company.legalName }, jobLocation: { '@type': 'Place', address: { '@type': 'PostalAddress', addressLocality: r.city, addressCountry: 'IN' } }, directApply: false }];
 const upload = integrations.careersUpload.endpoint;
 ---
-<Base title={`${r.title}, ${r.city}`} description={`${r.title} at Skylark Express in ${r.city} (${r.arrangement}). ${r.summary}`} jsonld={jsonld}>
+<Base title={`${r.title.replace(' – Healthcare', '')} Job, ${r.city}`} crumbs={[{ name: 'Careers', href: '/careers' }, { name: r.title, href: `/careers/${r.slug}` }]} description={`${r.title} at Skylark Express, ${r.city} (${r.arrangement}). ${r.summary}`.slice(0, 160)} jsonld={jsonld}>
   <section class="page-hero">
     <div class="wrap role">
       <nav aria-label="Breadcrumb"><ol class="crumbs" role="list"><li><a href="/">Home</a></li><li><a href="/careers">Careers</a></li></ol></nav>

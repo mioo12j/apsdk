@@ -37,9 +37,8 @@ export const founders = [
     shortName: 'Rakesh Yadav',
     title: 'Chief Managing Director',
     responsibility: 'Leads sales and business growth',
-    // PORTRAIT PAIRING: the two supplied portraits were attached in the order
-    // "Mr. Rakesh Yadav, then Mr. Naveen Yadav". If the pairing is wrong, swap the two `portrait` values.
-    portrait: 'founder-a',
+    // PORTRAIT PAIRING confirmed by the client: Mr. Rakesh Yadav is the city-background portrait.
+    portrait: 'founder-b',
     alt: 'Portrait of Mr. Rakesh Yadav, Chief Managing Director of Skylark Express',
   },
   {
@@ -48,7 +47,8 @@ export const founders = [
     shortName: 'Naveen Yadav',
     title: 'Managing Director',
     responsibility: 'Leads finance and operations',
-    portrait: 'founder-b',
+    // Mr. Naveen Yadav is the white-background portrait.
+    portrait: 'founder-a',
     alt: 'Portrait of Mr. Naveen Yadav, Managing Director of Skylark Express',
   },
 ] as const;

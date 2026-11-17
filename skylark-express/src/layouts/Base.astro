@@ -5,17 +5,21 @@ import Footer from '../components/Footer.astro';
 import { company } from '../data/company';
 import { ORIGIN } from '../data/site';
 import { integrations } from '../config/integrations';
-interface Props { title: string; description: string; path?: string; noindex?: boolean; ogImage?: string; preloadImage?: string; jsonld?: object[]; bare?: boolean }
-const { title, description, path = Astro.url.pathname, noindex = false, ogImage = '/brand/og-skylark-express.jpg', jsonld = [] } = Astro.props;
+interface Props { title: string; description: string; path?: string; noindex?: boolean; ogImage?: string; ogAlt?: string; preloadImage?: string; jsonld?: object[]; bare?: boolean; crumbs?: { name: string; href: string }[] }
+const { title, description, path = Astro.url.pathname, noindex = false, ogImage = '/brand/og-skylark-express.jpg', ogAlt = 'A Skylark Express truck leaving a loading bay before sunrise, with the line “From the first pickup to the final handover.”', jsonld = [], crumbs } = Astro.props;
 const clean = path === '/' ? '/' : path.replace(/\/$/, '');
 const canonical = ORIGIN + clean;
 const preview = integrations.siteMode === 'preview';
-const fullTitle = clean === '/' ? `${company.name} | Road, rail and air freight across India` : `${title} | ${company.name}`;
+const fullTitle = clean === '/' ? 'Skylark Express | Logistics Company in Delhi NCR, Since 1993' : /Skylark/.test(title) ? title : `${title} | ${company.name}`;
+const ogAbs = /^https?:/.test(ogImage) ? ogImage : ORIGIN + ogImage;
+const website = { '@context': 'https://schema.org', '@type': 'WebSite', '@id': ORIGIN + '/#website', url: ORIGIN + '/', name: company.name, inLanguage: 'en-IN', publisher: { '@id': ORIGIN + '/#organization' } };
+const breadcrumb = clean === '/' || noindex ? null : { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ name: 'Home', href: '/' }, ...(crumbs ?? [{ name: title.split(':')[0], href: clean }])].map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c.name, item: ORIGIN + (c.href === '/' ? '/' : c.href) })) };
+const webpage = { '@context': 'https://schema.org', '@type': clean === '/about' ? 'AboutPage' : clean === '/contact' ? 'ContactPage' : 'WebPage', '@id': canonical + '#webpage', url: canonical, name: fullTitle, description, inLanguage: 'en-IN', isPartOf: { '@id': ORIGIN + '/#website' }, primaryImageOfPage: ogAbs };
 const org = {
-  '@context': 'https://schema.org', '@type': 'Organization', '@id': ORIGIN + '/#organization', name: company.legalName, alternateName: company.name,
+  '@context': 'https://schema.org', '@type': ['Organization', 'LocalBusiness'], image: ORIGIN + '/brand/og-skylark-express.jpg', telephone: '+911141666666', priceRange: '₹₹', areaServed: { '@type': 'Country', name: 'India' }, knowsAbout: ['Full Truck Load', 'Part Truck Load', 'Rail freight', 'Air cargo', 'Warehousing', 'Project cargo', 'Over-dimensional cargo', 'Industrial packaging'], openingHoursSpecification: { '@type': 'OpeningHoursSpecification', dayOfWeek: company.hours.days, opens: company.hours.opens, closes: company.hours.closes }, '@id': ORIGIN + '/#organization', name: company.legalName, alternateName: company.name,
   url: ORIGIN + '/', logo: ORIGIN + '/brand/skylark-express-logo.png', foundingDate: '1993', slogan: company.brandLine, email: company.email,
   founders: [{ '@type': 'Person', name: 'Rakesh Yadav', jobTitle: 'Chief Managing Director' }, { '@type': 'Person', name: 'Naveen Yadav', jobTitle: 'Managing Director' }],
-  address: { '@type': 'PostalAddress', streetAddress: 'Sector 17–18 Divider Road, Sector 18', addressLocality: 'Gurugram', addressRegion: 'Haryana', postalCode: '122022', addressCountry: 'IN' },
+  address: { '@type': 'PostalAddress', streetAddress: 'Sector 17–18 Divider Road, Sector 18', addressLocality: 'Gurugram', addressRegion: 'Haryana', postalCode: '122022', addressCountry: 'IN' }, geo: { '@type': 'GeoCoordinates', latitude: 28.4925, longitude: 77.07 },
   contactPoint: company.phones.map((p) => ({ '@type': 'ContactPoint', telephone: p.tel, contactType: 'customer service', areaServed: 'IN', availableLanguage: ['en', 'hi'], hoursAvailable: { '@type': 'OpeningHoursSpecification', dayOfWeek: company.hours.days, opens: company.hours.opens, closes: company.hours.closes } })),
 };
 ---
@@ -27,7 +31,11 @@ const org = {
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    {(noindex || preview) && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="alternate" hreflang="en-IN" href={canonical} />
+    <link rel="alternate" hreflang="x-default" href={canonical} />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="geo.region" content="IN-HR" /><meta name="geo.placename" content="Gurugram" />
+    {(noindex || preview) ? <meta name="robots" content="noindex, nofollow" /> : <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />}
     <meta name="theme-color" content="#0B202C" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
@@ -39,13 +47,18 @@ const org = {
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={ORIGIN + ogImage} />
+    <meta property="og:image" content={ogAbs} />
+    <meta property="og:image:alt" content={ogAlt} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:locale" content="en_IN" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogAbs} />
+    <meta name="twitter:image:alt" content={ogAlt} />
     <slot name="head" />
-    <script type="application/ld+json" set:html={JSON.stringify([org, ...jsonld])} />
+    <script type="application/ld+json" set:html={JSON.stringify([org, website, webpage, ...(breadcrumb ? [breadcrumb] : []), ...jsonld])} />
     <script is:inline>document.documentElement.classList.add('js')</script>
   </head>
   <body>

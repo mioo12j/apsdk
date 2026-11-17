@@ -5,24 +5,18 @@ const conn = (navigator as any).connection;
 const saveData = !!conn?.saveData || /(^|-)2g/.test(conn?.effectiveType || '');
 const wide = matchMedia('(min-width:1024px)');
 
-// 01 · hero take: plays once, silently, after the poster has rendered — capable laptops only.
-const hv = document.querySelector<HTMLVideoElement>('[data-hero-video]');
-if (hv && !reduce && !saveData && wide.matches && (navigator.hardwareConcurrency || 4) >= 4) {
-  const start = () => {
-    hv.src = innerWidth * devicePixelRatio > 1500 ? '/media/hero-dispatch-1080p.mp4' : '/media/hero-dispatch-720p.mp4';
-    hv.addEventListener('playing', () => hv.classList.add('on'), { once: true });
-    hv.addEventListener('ended', () => { /* settles on its composed last frame */ }, { once: true });
-    hv.play().catch(() => {});
-  };
-  const poster = document.querySelector<HTMLImageElement>('[data-hero-poster]');
-  const go = () => ('requestIdleCallback' in window ? requestIdleCallback(start, { timeout: 1500 }) : setTimeout(start, 600));
-  if (poster?.complete) go(); else poster?.addEventListener('load', go, { once: true });
-}
-
 // scroll-linked values
-const hero = document.querySelector<HTMLElement>('[data-hero]');
-const heroMedia = document.querySelector<HTMLElement>('[data-hero-media]');
-const heroCopy = document.querySelector<HTMLElement>('[data-hero-copy]');
+const sky = document.querySelector<HTMLElement>('[data-sky]');
+const L = (root: ParentNode | null, n: string) => root?.querySelector<HTMLElement>(`[data-layer="${n}"]`) ?? null;
+const skyL = { plane: L(sky, 'plane'), truck: L(sky, 'truck'), sky: L(sky, 'skyline'), lane: L(sky, 'lane'), copy: L(sky, 'copy'), sun: L(sky, 'sun'), dawn: L(sky, 'dawn'), c1: L(sky, 'c1'), c2: L(sky, 'c2'), c3: L(sky, 'c3') };
+const carton = document.querySelector<HTMLElement>('[data-layer="carton"]');
+const modes = document.querySelector<HTMLElement>('[data-modes]');
+const mTrack = document.querySelector<HTMLElement>('[data-modes-track]');
+const mLane = document.querySelector<HTMLElement>('[data-modes-lane]');
+const mPanels = Array.from(document.querySelectorAll<HTMLElement>('[data-panel]'));
+const mDots = Array.from(document.querySelectorAll<HTMLElement>('[data-dot]'));
+const T = (el: HTMLElement | null, v: string) => { if (el) el.style.transform = v; };
+const ease = (t: number) => t * t * (3 - 2 * t);
 const routes = Array.from(document.querySelectorAll<HTMLElement>('[data-route]'));
 const journey = document.querySelector<HTMLElement>('[data-journey]');
 const jv = document.querySelector<HTMLVideoElement>('[data-journey-video]');
@@ -71,13 +65,50 @@ function journeyTick(vh: number) {
   jv?.style.setProperty('--jz', (1.02 + 0.03 * Math.sin(p * Math.PI)).toFixed(4));
 }
 
+// 01 · sky: the freighter climbs out over the headline, the truck pulls away along the lane line
+function skyTick(vh: number) {
+  if (!sky) return;
+  const r = sky.getBoundingClientRect(), pinned = sky.classList.contains('is-pin');
+  const p = clamp(pinned ? -r.top / (r.height - (vh - r.top - r.height > 0 ? 0 : 0) - (vh - 72)) : -r.top / Math.max(1, r.height * 0.9));
+  if (p > 0.01) sky.setAttribute('data-moved', '');
+  const vw = innerWidth / 100, pe = ease(p);
+  T(skyL.plane, `translate3d(${(pe * 34 * vw).toFixed(1)}px,${(-pe * 34).toFixed(2)}vh,0) rotate(${(-6 - pe * 8).toFixed(2)}deg) scale(${(0.82 + pe * 0.45).toFixed(3)})`);
+  T(skyL.truck, `translate3d(${(Math.pow(p, 1.5) * 70 * vw).toFixed(1)}px,0,0)`);
+  T(skyL.lane, `translate3d(${(-p * 520).toFixed(1)}px,0,0)`);
+  T(skyL.sky, `translate3d(${(-p * 4 * vw).toFixed(1)}px,${(p * 3).toFixed(2)}vh,0)`);
+  T(skyL.sun, `translate3d(0,${(-p * 16).toFixed(2)}vh,0) scale(${(1 + p * 0.25).toFixed(3)})`); if (skyL.dawn) skyL.dawn.style.opacity = (p * 0.9).toFixed(3); // the sun comes up as you scroll
+  T(skyL.c1, `translate3d(${(p * 18 * vw).toFixed(1)}px,0,0)`); T(skyL.c2, `translate3d(${(-p * 12 * vw).toFixed(1)}px,0,0)`); T(skyL.c3, `translate3d(${(p * 8 * vw).toFixed(1)}px,${(-p * 4).toFixed(1)}vh,0)`);
+  if (skyL.copy && pinned) { const q = clamp((p - 0.62) / 0.36); skyL.copy.style.opacity = String(1 - q); skyL.copy.style.transform = `translate3d(0,${(-q * 60).toFixed(1)}px,0)`; skyL.copy.style.visibility = q >= 1 ? 'hidden' : ''; }
+}
+// 02 · the carton turns as the figures pass
+function cartonTick(vh: number) {
+  if (!carton || !carton.offsetParent) return;
+  const r = carton.parentElement!.getBoundingClientRect(); const p = clamp((vh - r.top) / (vh + r.height));
+  T(carton, `translate3d(0,${((0.5 - p) * 120).toFixed(1)}px,0) rotate(${((p - 0.5) * 22).toFixed(2)}deg)`);
+}
+// 02b · mode theatre: vertical scroll drives a horizontal run; vehicles move faster than their words
+function modesTick(vh: number) {
+  if (!modes) return;
+  const r = modes.getBoundingClientRect(), vw = innerWidth;
+  if (modes.classList.contains('is-pin') && mTrack) {
+    const p = clamp(-r.top / (r.height - (vh - 72))), x = p * 3; // 0..3 panels
+    T(mTrack, `translate3d(${(-x * vw).toFixed(1)}px,0,0)`);
+    T(mLane, `translate3d(${(-x * vw * 0.25).toFixed(1)}px,0,0)`);
+    mPanels.forEach((pn, i) => {
+      const d = x - i; // -1 → entering from right, 0 → centred, 1 → leaving left
+      T(pn.querySelector<HTMLElement>('[data-obj]'), `translate3d(${(-d * vw * 0.38).toFixed(1)}px,${(i === 3 ? -Math.max(0, d) * 22 : 0).toFixed(1)}vh,0) rotate(${(i === 3 ? -4 - Math.max(0, d) * 10 : 0).toFixed(2)}deg)`);
+      T(pn.querySelector<HTMLElement>('[data-word]'), `translate3d(${(d * vw * 0.22).toFixed(1)}px,0,0)`);
+      const c = pn.querySelector<HTMLElement>('.m-copy'); if (c) { c.style.opacity = String(clamp(1 - Math.abs(d) * 1.6)); c.style.transform = `translate3d(${(-d * 60).toFixed(1)}px,0,0)`; }
+    });
+    const on = Math.round(x); mDots.forEach((d, i) => d.classList.toggle('on', i === on));
+  } else {
+    mPanels.forEach((pn) => { const q = pn.getBoundingClientRect(); const d = clamp((vh - q.top) / (vh + q.height)) - 0.5; T(pn.querySelector<HTMLElement>('[data-obj]'), `translate3d(${(-d * vw * 0.5).toFixed(1)}px,0,0)`); T(pn.querySelector<HTMLElement>('[data-word]'), `translate3d(${(d * vw * 0.2).toFixed(1)}px,0,0)`); });
+  }
+}
+
 function tick() {
   const vh = innerHeight;
-  if (hero && heroMedia && !reduce && wide.matches) {
-    const r = hero.getBoundingClientRect(); const p = clamp(-r.top / r.height);
-    heroMedia.style.transform = `translate3d(0,${(p * 9).toFixed(2)}%,0) scale(${(1 + p * 0.06).toFixed(4)})`;
-    if (heroCopy) { heroCopy.style.transform = `translate3d(0,${(-p * 40).toFixed(1)}px,0)`; heroCopy.style.opacity = String(clamp(1 - p * 1.25)); }
-  }
+  if (!reduce) { skyTick(vh); cartonTick(vh); modesTick(vh); }
   if (!reduce) for (const s of routes) { const r = s.getBoundingClientRect(); s.style.setProperty('--p', clamp((vh * 0.62 - r.top) / r.height).toFixed(4)); }
   if (!reduce) for (const el of par) { const r = el.parentElement!.getBoundingClientRect(); const p = clamp((vh - r.top) / (vh + r.height)); el.style.transform = `translate3d(0,${((p - 0.5) * 10).toFixed(2)}%,0)`; }
   journeyTick(vh);
@@ -91,19 +122,6 @@ const endSec = document.querySelector<HTMLElement>('[data-route="end"]'), podLin
 const setEnd = () => { if (endSec && podLink) endSec.style.setProperty('--route-end', (podLink.getBoundingClientRect().bottom - endSec.getBoundingClientRect().top - 3) + 'px'); };
 setEnd(); addEventListener('resize', setEnd); addEventListener('load', setEnd);
 
-// 04 · services: hover, focus or selection reveals the matching photograph
-const svc = document.querySelector<HTMLElement>('[data-services]');
-if (svc) {
-  const rows = Array.from(svc.querySelectorAll<HTMLElement>('[data-svc]')), imgs = Array.from(svc.querySelectorAll<HTMLElement>('[data-svc-img]'));
-  const set = (i: number) => { rows.forEach((r, k) => r.classList.toggle('on', k === i)); imgs.forEach((m, k) => m.classList.toggle('on', k === i)); };
-  rows.forEach((r, i) => {
-    r.addEventListener('pointerenter', () => set(i)); r.addEventListener('focusin', () => set(i));
-    r.querySelector('a')!.addEventListener('click', () => { // thumbnail expands into the service hero where View Transitions are supported
-      const im = (wide.matches || innerWidth >= 900 ? imgs[i] : r).querySelector('img'); if (im) (im.style as any).viewTransitionName = 'service-hero';
-    });
-  });
-}
-
 // 02 · figures count up to the values already present in the HTML
 if (!reduce && 'IntersectionObserver' in window) {
   const io = new IntersectionObserver((es) => es.forEach((e) => {
@@ -116,3 +134,12 @@ if (!reduce && 'IntersectionObserver' in window) {
   }), { threshold: 0.6 });
   document.querySelectorAll('[data-count]').forEach((el) => io.observe(el));
 }
+
+// Back/forward: pinned sections change the page height during load, so restore the exact place ourselves.
+try {
+  history.scrollRestoration = 'manual';
+  addEventListener('pagehide', () => sessionStorage.setItem('skylark.home.y', String(scrollY)));
+  const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+  const saved = sessionStorage.getItem('skylark.home.y');
+  if (nav?.type === 'back_forward' && saved) { const y = +saved; const go = () => scrollTo(0, y); go(); requestAnimationFrame(go); addEventListener('load', go, { once: true }); }
+} catch {}

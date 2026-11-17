@@ -7,23 +7,13 @@ import IndiaMap from '../components/IndiaMap.astro';
 import OfficeData from '../components/OfficeData.astro';
 import Founders from '../components/Founders.astro';
 import PodExample from '../components/PodExample.astro';
-import { getImage } from 'astro:assets';
-import heroPoster from '../assets/img/hero-poster.png';
-import heroMobile from '../assets/img/hero-45-gen.jpg';
+import Cut from '../components/Cut.astro';
 import { company, figures } from '../data/company';
 import { services } from '../data/services';
 import { offices } from '../data/offices';
 import scrub from '../data/generated/scrub.json';
 
-// Art-directed hero poster: 16:9 first frame of the truck take on wide screens, 4:5 dispatch poster on phones.
-const mk = async (src: ImageMetadata, ws: number[], format: 'avif' | 'webp' | 'jpeg', quality: number) =>
-  (await Promise.all(ws.map(async (w) => `${(await getImage({ src, width: w, format, quality })).src} ${w}w`))).join(', ');
-const dW = [960, 1440, 1920], mW = [480, 720, 960];
-const hero = {
-  dAvif: await mk(heroPoster, dW, 'avif', 50), dWebp: await mk(heroPoster, dW, 'webp', 62),
-  mAvif: await mk(heroMobile, mW, 'avif', 48), mWebp: await mk(heroMobile, mW, 'webp', 60),
-  fallback: (await getImage({ src: heroPoster, width: 1440, format: 'jpeg', quality: 70 })).src,
-};
+const cutFor: Record<string, string> = { 'road-logistics': 'truck', 'railway-logistics': 'train', 'air-logistics': 'uld', warehousing: 'forklift', 'project-cargo': 'lowloader', packaging: 'crate' };
 const homeFigures = [figures.since, figures.warehouses, figures.pinCodes]; // at most three together on Home
 const journey = [
   { k: 'Pickup', img: 'film-pickup', alt: 'A hand scans the label of a kraft carton sealed with Skylark tape at a dispatch counter', text: 'The carton is sealed, labelled and scanned at the counter. From this scan onward it has a docket and a named custodian.', ev: '12 Nov, 17:42 IST · Gurugram · Picked up' },
@@ -33,40 +23,34 @@ const journey = [
 ];
 const published = offices.filter((o) => o.kind !== 'city').length, listed = offices.length - published;
 ---
-<Base title="Home" description="Skylark Express brings road, rail and air freight together with warehousing, specialist packaging and project cargo across India. Track a docket or request a freight quote.">
-  <Fragment slot="head">
-    <link rel="preload" as="image" imagesrcset={hero.dAvif} imagesizes="100vw" type="image/avif" media="(min-width:768px)" fetchpriority="high" />
-  </Fragment>
+<Base title="Home" description="Skylark Express: pan-India logistics company from Gurugram and Delhi since 1993. FTL and PTL road freight, rail, air cargo, warehousing and project cargo.">
 
-  <!-- 01 · Dispatch -->
-  <section class="hero dark" data-hero aria-labelledby="hero-h">
-    <div class="hero-media" data-hero-media>
-      <picture>
-        <source media="(max-width:767px)" type="image/avif" srcset={hero.mAvif} sizes="100vw" />
-        <source media="(max-width:767px)" type="image/webp" srcset={hero.mWebp} sizes="100vw" />
-        <source type="image/avif" srcset={hero.dAvif} sizes="100vw" />
-        <source type="image/webp" srcset={hero.dWebp} sizes="100vw" />
-        <img src={hero.fallback} width="1920" height="1080" alt="A Skylark Express truck eases out of an amber-lit loading bay before sunrise, beside a painted yellow lane line" fetchpriority="high" decoding="async" data-hero-poster />
-      </picture>
-      <video class="hero-video" muted playsinline preload="none" aria-hidden="true" tabindex="-1" data-hero-video></video>
-      <span class="hero-lane" aria-hidden="true"></span>
-    </div>
-    <div class="wrap hero-inner">
-      <div class="hero-copy" data-hero-copy>
+  <!-- 01 · Dispatch — layered cut-outs; scrolling flies the freighter out and drives the truck away -->
+  <section class="sky" data-sky aria-labelledby="hero-h">
+    <script is:inline>(function(){var c=navigator.connection||{};if(!matchMedia('(prefers-reduced-motion:reduce)').matches&&!c.saveData&&innerWidth>=900&&innerHeight>=600)document.currentScript.parentElement.classList.add('is-pin')})();</script>
+    <div class="sky-stick">
+      <div class="sky-scene" aria-hidden="true">
+        <div class="sky-bg"></div>
+        <div class="sky-stars"></div>
+        <div class="sky-dawn" data-layer="dawn"></div>
+        <div class="sky-sun" data-layer="sun"></div>
+        <div class="sky-cloud c1" data-layer="c1"></div><div class="sky-cloud c2" data-layer="c2"></div><div class="sky-cloud c3" data-layer="c3"></div>
+        <div class="sky-plane" data-layer="plane"><span class="trail"></span><Cut name="plane" class="plane-img" priority sizes="(min-width:900px) 52vw, 78vw" widths={[600, 1000, 1600]} /></div>
+        <div class="sky-skyline" data-layer="skyline"><Cut name="skyline" sizes="140vw" widths={[1000, 1600, 2400]} /></div>
+        <div class="sky-road"><span class="lane" data-layer="lane"></span></div>
+        <div class="sky-truck" data-layer="truck"><span class="tshadow"></span><Cut name="truck" priority sizes="(min-width:900px) 38vw, 80vw" widths={[500, 800, 1200]} /></div>
+      </div>
+      <div class="wrap sky-copy" data-layer="copy">
         <p class="eyebrow">{company.brandLine}</p>
-        <h1 class="display h-hero" id="hero-h">From the first <br class="br-d" />pickup to the <br class="br-d" />final handover.</h1>
-        <p class="lede hero-sub">Skylark brings road, rail and air freight together with warehousing, specialist packaging and project cargo across India.</p>
-        <div class="hero-panel">
-          <TrackForm id="hero-track" compact />
-        </div>
+        <h1 class="display sky-h1" id="hero-h"><span class="ln">From the first</span> <span class="ln">pickup to the</span> <span class="ln">final handover.</span></h1>
+        <p class="lede sky-sub">Skylark brings road, rail and air freight together with warehousing, specialist packaging and project cargo across India.</p>
+        <div class="hero-panel"><TrackForm id="hero-track" compact /></div>
         <div class="hero-actions">
           <a class="btn btn-ghost" href="/quote">Get a freight quote <span class="arr" aria-hidden="true">→</span></a>
-          <button class="play-film hero-play" type="button" data-film-open>
-            <span class="pf-ic" aria-hidden="true"><svg width="12" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z" fill="currentColor"/></svg></span>
-            Play film · 42 seconds
-          </button>
+          <button class="play-film" type="button" data-film-open><span class="pf-ic" aria-hidden="true"><svg width="12" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z" fill="currentColor"/></svg></span>Play film · 42 seconds</button>
         </div>
       </div>
+      <p class="sky-hint" aria-hidden="true"><span class="j-mouse"></span>Scroll</p>
     </div>
   </section>
 
@@ -88,6 +72,42 @@ const published = offices.filter((o) => o.kind !== 'city').length, listed = offi
         ))}
       </dl>
       <p class="small muted facts-note" data-reveal>{figures.note} <a href="/serviceability">Check a PIN code</a></p>
+      <div class="facts-carton" data-layer="carton" aria-hidden="true"><span class="cshadow"></span><Cut name="carton" sizes="(min-width:900px) 30vw, 60vw" /></div>
+    </div>
+  </section>
+
+  <!-- 02b · The right mode for the load — pinned horizontal theatre -->
+  <section class="modes" data-modes aria-labelledby="modes-h">
+    <script is:inline>(function(){var c=navigator.connection||{};if(!matchMedia('(prefers-reduced-motion:reduce)').matches&&!c.saveData&&innerWidth>=900&&innerHeight>=600)document.currentScript.parentElement.classList.add('is-pin')})();</script>
+    <div class="m-stick">
+      <header class="wrap m-head">
+        <p class="eyebrow">Linehaul</p>
+        <h2 class="display h-1" id="modes-h">The right mode for the load.</h2>
+        <ol class="m-dots" aria-hidden="true"><li data-dot>Pickup</li><li data-dot>Road</li><li data-dot>Rail</li><li data-dot>Air</li></ol>
+      </header>
+      <div class="m-track" data-modes-track>
+          <article class="m-panel m-van" data-panel={0} aria-labelledby="m-van-h">
+            <span class="m-word" aria-hidden="true" data-word data-text="Pickup"></span>
+            <div class="m-obj" data-obj aria-hidden="true"><span class="oshadow"></span><Cut name="van" sizes="(min-width:900px) 42vw, 90vw" widths={[500, 900, 1500]} /></div>
+            <div class="m-copy"><p class="mono m-k">01 · First mile</p><h3 class="display h-1" id="m-van-h">Collected from your door.</h3><p>A named local vehicle collects from your dock, counts the pieces and scans the docket before it leaves.</p><p><a class="link-arrow" href="/services/road-logistics">Road logistics <span class="arr" aria-hidden="true">→</span></a></p></div>
+          </article>
+          <article class="m-panel m-truck" data-panel={1} aria-labelledby="m-truck-h">
+            <span class="m-word" aria-hidden="true" data-word data-text="Road"></span>
+            <div class="m-obj" data-obj aria-hidden="true"><span class="oshadow"></span><Cut name="truck" sizes="(min-width:900px) 42vw, 90vw" widths={[500, 900, 1500]} /></div>
+            <div class="m-copy"><p class="mono m-k">02 · Road</p><h3 class="display h-1" id="m-truck-h">Full or part truck load.</h3><p>Full Truck Load (FTL) gives one shipper the vehicle; Part Truck Load (PTL) shares it. Every hub handover is scanned.</p><p><a class="link-arrow" href="/services/road-logistics">FTL and PTL <span class="arr" aria-hidden="true">→</span></a></p></div>
+          </article>
+          <article class="m-panel m-train" data-panel={2} aria-labelledby="m-train-h">
+            <span class="m-word" aria-hidden="true" data-word data-text="Rail"></span>
+            <div class="m-obj" data-obj aria-hidden="true"><span class="oshadow"></span><Cut name="train" sizes="(min-width:900px) 60vw, 90vw" widths={[500, 900, 1500]} /></div>
+            <div class="m-copy"><p class="mono m-k">03 · Rail</p><h3 class="display h-1" id="m-train-h">Road to rail and back.</h3><p>Road pickup, a consolidated rail leg and road delivery, with the piece count checked at both terminals.</p><p><a class="link-arrow" href="/services/railway-logistics">Railway logistics <span class="arr" aria-hidden="true">→</span></a></p></div>
+          </article>
+          <article class="m-panel m-plane" data-panel={3} aria-labelledby="m-plane-h">
+            <span class="m-word" aria-hidden="true" data-word data-text="Air"></span>
+            <div class="m-obj" data-obj aria-hidden="true"><span class="oshadow"></span><Cut name="plane" sizes="(min-width:900px) 60vw, 90vw" widths={[500, 900, 1500]} /></div>
+            <div class="m-copy"><p class="mono m-k">04 · Air</p><h3 class="display h-1" id="m-plane-h">When it must arrive by a time.</h3><p>Domestic air cargo with carrier coordination and milestone updates from pickup to delivery.</p><p><a class="link-arrow" href="/services/air-logistics">Air logistics <span class="arr" aria-hidden="true">→</span></a></p></div>
+          </article>
+      </div>
+      <div class="m-ground" aria-hidden="true"><span class="m-lane" data-modes-lane></span></div>
     </div>
   </section>
 
@@ -130,32 +150,27 @@ const published = offices.filter((o) => o.kind !== 'city').length, listed = offi
     </div>
   </section>
 
-  <!-- 04 · Choose a service -->
-  <section class="section services" id="services" aria-labelledby="svc-h" data-route>
-    <span class="route" aria-hidden="true"></span>
+  <!-- 04 · Choose a service — lifted objects -->
+  <section class="section services" id="services" aria-labelledby="svc-h">
     <div class="wrap">
       <div class="svc-head">
         <p class="eyebrow" data-reveal>Six service lines</p>
         <h2 class="display h-page" id="svc-h" data-reveal>What are you moving?</h2>
+        <p class="lede" data-reveal>Discuss a single service or the whole movement. Every page ends with an enquiry that goes to the right team. <a href="/services">Use the service selector</a></p>
       </div>
-      <div class="grid svc-grid" data-services>
-        <ul class="svc-rows" role="list">
-          {services.map((s, i) => (
-            <li class:list={['svc-row', { on: i === 0 }]} data-svc={i}>
-              <a href={`/services/${s.slug}`} class="svc-link" data-svc-link>
-                <span class="mono svc-n" aria-hidden="true">{s.index}</span>
-                <span class="svc-thumb"><Pic name={s.image} alt="" ratio={1} widths={[160, 320]} sizes="80px" /></span>
-                <span class="svc-text"><span class="display svc-name">{s.name}</span><span class="svc-sum">{s.summary}</span></span>
-                <span class="svc-arr" aria-hidden="true">→</span>
-              </a>
-            </li>
-          ))}
-        </ul>
-        <div class="svc-preview" aria-hidden="true">
-          {services.map((s, i) => <div class:list={['svc-img', { on: i === 0 }]} data-svc-img={i}><Pic name={s.image} alt="" ratio={4 / 5} widths={[480, 800, 1100]} sizes="(min-width:900px) 38vw, 0px" /></div>)}
-        </div>
-      </div>
-      <p class="svc-foot" data-reveal>Not sure which one fits? <a href="/services">Use the service selector</a></p>
+      <ul class="lift-grid" role="list">
+        {services.map((s, i) => (
+          <li data-reveal style={`--d:${(i % 3) * 90}ms`}>
+            <a class="lift" href={`/services/${s.slug}`}>
+              <span class="lift-top"><span class="mono">{s.index} / 06</span><span class="mono">{s.spec[0][1]}</span></span>
+              <span class="lift-obj" aria-hidden="true" data-cut={cutFor[s.slug]}><span class="lshadow"></span><Cut name={cutFor[s.slug]} sizes="(min-width:1100px) 26vw, (min-width:600px) 44vw, 86vw" widths={[400, 700, 1000]} /></span>
+              <span class="display lift-name">{s.name}</span>
+              <span class="lift-sum">{s.summary}</span>
+              <span class="lift-go" aria-hidden="true">View service <span class="arr">→</span></span>
+            </a>
+          </li>
+        ))}
+      </ul>
     </div>
   </section>
 
@@ -250,40 +265,59 @@ const published = offices.filter((o) => o.kind !== 'city').length, listed = offi
 </Base>
 
 <style>
-  /* ── hero ── */
-  .hero{position:relative;isolation:isolate;overflow:clip}
-  .hero-media{position:relative}
-  .hero-media img,.hero-video{width:100%;height:100%;object-fit:cover;display:block}
-  .hero-video{position:absolute;inset:0;opacity:0;transition:opacity .5s var(--ease)}
-  .hero-video.on{opacity:1}
-  .hero-inner{position:relative;z-index:2;padding-block:24px 24px}
-  .hero-copy{display:grid;gap:16px;max-width:680px}
-  .hero-sub{color:var(--paper)}
-  .hero-panel{background:var(--petrol);padding:16px;border-radius:var(--r);border:1px solid var(--rule-dark)}
+  /* ── hero: layered sky ── */
+  .sky{position:relative;isolation:isolate;color:var(--paper);background:#071822}
+  .sky-stick{position:relative;display:flex;flex-direction:column;overflow:clip}
+  .sky-scene{position:relative;order:2;height:clamp(260px,78vw,440px);overflow:hidden}
+  .sky-bg{position:absolute;inset:0;background:
+    radial-gradient(90% 46% at 80% 82%,rgba(255,196,120,.75) 0%,rgba(226,132,74,.42) 30%,rgba(18,60,70,0) 70%),
+    linear-gradient(180deg,#06131b 0%,#0B202C 30%,#123C46 52%,#2c5157 64%,#7d6b55 74%,#d18c55 81%,#e7a160 86%,#0d1d26 86.2%)}
+  .sky-stars{position:absolute;inset:0 0 45% 0;background-image:radial-gradient(1px 1px at 12% 18%,#fff8 50%,transparent 51%),radial-gradient(1px 1px at 33% 9%,#fff6 50%,transparent 51%),radial-gradient(1.5px 1.5px at 58% 22%,#fff7 50%,transparent 51%),radial-gradient(1px 1px at 71% 6%,#fff5 50%,transparent 51%),radial-gradient(1px 1px at 86% 28%,#fff6 50%,transparent 51%),radial-gradient(1px 1px at 22% 36%,#fff4 50%,transparent 51%),radial-gradient(1.2px 1.2px at 47% 40%,#fff4 50%,transparent 51%),radial-gradient(1px 1px at 93% 14%,#fff5 50%,transparent 51%);opacity:.8}
+  .sky-dawn{position:absolute;inset:0;background:linear-gradient(180deg,rgba(40,90,110,0) 20%,rgba(120,150,150,.35) 62%,rgba(255,190,120,.55) 100%);opacity:0}
+  .sky-sun{position:absolute;right:16%;bottom:13%;width:38vmin;height:38vmin;border-radius:50%;background:radial-gradient(circle,rgba(255,214,150,.95) 0%,rgba(255,180,100,.55) 18%,rgba(255,150,80,0) 60%);filter:blur(4px)}
+  .sky-cloud{position:absolute;border-radius:50%;background:radial-gradient(closest-side,rgba(246,244,238,.42),rgba(246,244,238,0));filter:blur(18px)}
+  .c1{width:46vw;height:9vw;left:-6vw;top:22%}.c2{width:38vw;height:7vw;right:-4vw;top:12%;opacity:.7}.c3{width:30vw;height:6vw;left:40%;top:46%;opacity:.55}
+  .sky-plane{position:absolute;left:30%;top:6%;width:66%;transform-origin:50% 50%;will-change:transform;z-index:2}
+  .sky-plane :global(img){width:100%;height:auto;animation:float 7s ease-in-out infinite;filter:drop-shadow(0 18px 28px rgba(4,14,20,.35))}
+  .trail{position:absolute;right:88%;top:52%;width:16vw;height:2px;background:linear-gradient(90deg,rgba(246,244,238,0),rgba(246,244,238,.4));transform:rotate(8deg);transform-origin:right center;filter:blur(1px)}
+  .sky-skyline{position:absolute;left:-30%;right:-30%;bottom:calc(17% - 2px);z-index:3;opacity:.96}
+  .sky-skyline :global(img){width:100%;height:auto;display:block}
+  .sky-road{position:absolute;left:0;right:0;bottom:0;height:17%;z-index:4;background:linear-gradient(180deg,#0d1d26,#071219)}
+  .sky-road .lane{position:absolute;left:0;right:0;top:44%;height:4px;background:repeating-linear-gradient(90deg,var(--citron) 0 64px,transparent 64px 104px);opacity:.9;will-change:transform}
+  .sky-truck{position:absolute;right:4%;bottom:6%;width:62%;z-index:5;will-change:transform}
+  .sky-truck :global(img){width:100%;height:auto;position:relative;animation:idle 2.6s ease-in-out infinite}
+  .tshadow,.oshadow,.lshadow,.cshadow{position:absolute;left:8%;right:8%;bottom:1%;height:9%;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.55),rgba(0,0,0,0));filter:blur(6px)}
+  .sky-copy{order:1;position:relative;z-index:6;display:grid;gap:16px;padding-block:24px 22px;background:linear-gradient(180deg,#06131b,#0a1d27)}
+  .sky-h1{font-size:clamp(2.875rem,1.6rem + 6vw,4rem);line-height:.92;letter-spacing:-.01em}
+  .sky-h1 .ln{display:block}
+  .sky-sub{color:rgba(246,244,238,.88)}
+  .hero-panel{background:rgba(18,60,70,.86);padding:16px;border-radius:var(--r);border:1px solid var(--rule-dark);backdrop-filter:blur(8px)}
   .hero-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
-  .br-d{display:none}
-  .hero-lane{display:none}
-  @media (max-width:767px){
-    .hero{display:flex;flex-direction:column}
-    .hero-inner{order:1}
-    .hero-media{order:2;aspect-ratio:4/5}
-    .hero .eyebrow{display:none}
-    .hero-sub{order:5}
-    .hero-actions .btn{flex:1 1 100%}
+  .sky-hint{display:none}
+  @keyframes float{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-10px) rotate(-.6deg)}}
+  @keyframes idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.5px)}}
+  @media (max-width:899px){.sky-sub{order:5}.hero-actions .btn{flex:1 1 100%}.sky .eyebrow{display:none}}
+  @media (min-width:900px){
+    .sky-stick{display:block;height:calc(100svh - var(--header-h));min-height:620px}
+    .sky-scene{position:absolute;inset:0;height:auto}
+    .sky-copy{position:absolute;inset:0;background:none;align-content:center;padding-block:clamp(16px,4vh,48px) clamp(120px,22vh,220px)}
+    .sky-copy>*{max-width:min(50vw,680px)}
+    .sky-h1{font-size:clamp(3.5rem,min(7.6vw,12.4vh),8.25rem);text-shadow:0 4px 40px rgba(4,14,20,.55)}
+    .sky-sub{max-width:44ch}
+    .hero-panel{max-width:580px}
+    .sky-plane{left:38%;top:12%;width:52%}
+    .sky-truck{right:3.5%;bottom:5%;width:min(40%,calc(44vh * 1.29))}
+    .sky-skyline{bottom:calc(15% - 2px)}
+    .sky-road{height:15%}
+    .sky-hint{display:flex;position:absolute;left:50%;bottom:20px;transform:translateX(-50%);z-index:7;align-items:center;gap:10px;font-size:.75rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(246,244,238,.7);transition:opacity .4s}
+    .sky.is-pin{height:calc(100svh - var(--header-h) + 80vh)}
+    .sky.is-pin .sky-stick{position:sticky;top:var(--header-h)}
+    .sky[data-moved] .sky-hint{opacity:0}
   }
-  @media (min-width:768px){
-    .hero{min-height:min(calc(100svh - var(--header-h)),1080px);display:grid}
-    .hero-media{position:absolute;inset:0;z-index:0}
-    .hero-media::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(11,32,44,.95) 0%,rgba(11,32,44,.84) 28%,rgba(11,32,44,.3) 52%,rgba(11,32,44,0) 68%),linear-gradient(0deg,rgba(11,32,44,.45),rgba(11,32,44,0) 30%)}
-    .hero-inner{display:grid;align-content:center;padding-block:clamp(24px,5vh,72px)}
-    .hero-copy{gap:clamp(12px,2vh,22px);max-width:min(52vw,660px)}
-    .hero-sub{max-width:44ch}
-    .hero-panel{max-width:600px;padding:18px 20px}
-    .br-d{display:inline}
-    .hero .h-hero{font-size:clamp(3rem,min(7.4vw,11.6vh),6.75rem)}
-    .hero-lane{display:block;position:absolute;left:var(--route-x);bottom:0;width:3px;height:14%;background:linear-gradient(to bottom,rgba(213,239,68,0),var(--citron));z-index:1;margin-left:calc((100vw - min(100vw,var(--max)))/2)}
-  }
-  @media (min-width:768px) and (max-height:780px){.hero .eyebrow{display:none}.hero-sub{font-size:1rem}.hero-panel :global(.hint){display:none}}
+  @media (min-width:900px) and (max-height:780px){.sky .eyebrow{display:none}.sky-sub{font-size:1rem}.hero-panel :global(.hint){display:none}}
+  @media (prefers-reduced-motion:reduce){.sky-plane :global(img),.sky-truck :global(img){animation:none}}
+  .j-mouse{width:16px;height:26px;border:1.5px solid currentColor;border-radius:9px;position:relative;display:inline-block}
+  .j-mouse::after{content:"";position:absolute;left:50%;top:5px;width:2px;height:6px;margin-left:-1px;background:var(--citron);border-radius:1px;animation:jm 1.6s var(--ease) infinite}
   /* ── route line ── */
   .route{display:none}
   @media (min-width:900px){
@@ -358,34 +392,74 @@ const published = offices.filter((o) => o.kind !== 'city').length, listed = offi
     .is-cine .j-steps{min-height:13rem}
     .is-cine .j-node b{font-size:.625rem;letter-spacing:.06em}
   }
-  /* ── services ── */
-  .svc-head{display:grid;gap:14px;margin-bottom:clamp(28px,4vw,56px)}
-  .svc-rows{grid-column:1/-1;border-top:1.5px solid var(--ink)}
-  .svc-row{border-bottom:1px solid var(--rule-strong)}
-  .svc-link{display:grid;grid-template-columns:64px 1fr auto;gap:14px;align-items:center;padding:14px 0;text-decoration:none;color:var(--ink);min-height:88px}
-  .svc-n{display:none;color:var(--muted);font-size:.875rem}
-  .svc-thumb{width:64px;height:64px;overflow:hidden;background:var(--paper-2)}
-  .svc-thumb :global(img){width:100%;height:100%;object-fit:cover}
-  .svc-text{display:grid;gap:2px}
-  .svc-name{font-size:clamp(1.625rem,1.2rem + 2.4vw,3.25rem);line-height:1}
-  .svc-sum{font-size:.9375rem;color:var(--muted);line-height:1.35}
-  .svc-arr{font-size:1.5rem;transition:transform .25s var(--ease)}
-  .svc-link:hover .svc-arr,.svc-link:focus-visible .svc-arr{transform:translateX(6px)}
-  .svc-preview{display:none}
-  .svc-foot{margin-top:28px}
+  /* ── services: lifted objects ── */
+  .svc-head{display:grid;gap:14px;margin-bottom:clamp(28px,4vw,56px);max-width:860px}
+  .lift-grid{display:grid;gap:16px}
+  @media (min-width:600px){.lift-grid{grid-template-columns:1fr 1fr}}
+  @media (min-width:1100px){.lift-grid{grid-template-columns:repeat(3,1fr);gap:20px}}
+  .lift{position:relative;display:grid;gap:8px;padding:18px 20px 22px;background:#fff;border:1.5px solid var(--rule-strong);color:var(--ink);text-decoration:none;height:100%;overflow:hidden;transition:border-color .25s var(--ease),background-color .35s var(--ease)}
+  .lift::before{content:"";position:absolute;inset:auto 0 0 0;height:4px;background:var(--citron);transform:scaleX(0);transform-origin:left;transition:transform .45s var(--ease)}
+  .lift:hover,.lift:focus-visible{border-color:var(--ink)}
+  .lift:hover::before,.lift:focus-visible::before{transform:scaleX(1)}
+  .lift-top{display:flex;justify-content:space-between;gap:12px;font-size:.75rem;color:var(--muted);border-bottom:1px solid var(--rule);padding-bottom:10px}
+  .lift-grid>li{min-width:0}
+  .lift-obj{position:relative;display:block;aspect-ratio:16/10;margin:4px 0 6px;overflow:hidden;background:radial-gradient(70% 60% at 50% 55%,#F6F4EE 0%,#fff 70%)}
+  .lift-obj :global(picture){position:absolute;z-index:1;inset:8% 10% 12%;display:block}
+  .lift-obj[data-cut="train"] :global(picture){inset:22% -6% 26%}
+  .lift-obj[data-cut="lowloader"] :global(picture){inset:14% 4% 18%}
+  .lift-obj :global(img){width:100%;height:100%;object-fit:contain;transition:transform .6s cubic-bezier(.2,.9,.25,1.2);transform:translateY(0)}
+  .lift-obj .lshadow{left:18%;right:18%;bottom:6%;height:10%;transition:transform .6s var(--ease),opacity .6s}
+  .lift:hover .lift-obj :global(img),.lift:focus-visible .lift-obj :global(img){transform:translateY(-16px) rotate(-1.5deg) scale(1.04)}
+  .lift:hover .lshadow,.lift:focus-visible .lshadow{transform:scale(.8);opacity:.55}
+  .lift-name{font-size:clamp(1.75rem,1.3rem + 1.4vw,2.5rem);line-height:1}
+  .lift-sum{color:var(--muted);font-size:.9375rem;line-height:1.45}
+  .lift-go{margin-top:6px;font-weight:600;color:var(--link);display:inline-flex;gap:8px}
+  .lift:hover .arr{transform:translateX(4px)}.lift .arr{transition:transform .2s var(--ease)}
+  /* ── facts carton ── */
+  .facts-carton{display:none}
   @media (min-width:900px){
-    .svc-rows{grid-column:1/8}
-    .svc-link{grid-template-columns:48px 1fr auto;padding:20px 0;min-height:104px;transition:padding .3s var(--ease),background-color .3s}
-    .svc-thumb{display:none}.svc-n{display:block}
-    .svc-row.on .svc-link{padding-left:16px;background:linear-gradient(90deg,rgba(213,239,68,.5),rgba(213,239,68,0) 70%)}
-    .svc-sum{max-height:0;overflow:hidden;opacity:0;transition:max-height .3s var(--ease),opacity .3s}
-    .svc-row.on .svc-sum{max-height:3em;opacity:1}
-    .svc-preview{display:block;grid-column:8/13;position:sticky;top:calc(var(--header-h) + 24px);align-self:start;aspect-ratio:4/5;background:var(--petrol);overflow:hidden}
-    .svc-img{position:absolute;inset:0;clip-path:inset(0 0 100% 0);transition:clip-path .0s .4s;z-index:1}
-    .svc-img.on{clip-path:inset(0 0 0 0);transition:clip-path .4s var(--ease);z-index:2}
-    .svc-img :global(img){width:100%;height:100%;object-fit:cover;transform:scale(1.06);transition:transform .9s var(--ease)}
-    .svc-img.on :global(img){transform:none}
+    .facts{overflow:clip}
+    .facts-carton{display:block;position:absolute;right:calc(var(--gutter) + 1vw);top:14%;width:min(30vw,420px);will-change:transform}
+    .facts-carton :global(img){width:100%;height:auto;position:relative;filter:drop-shadow(0 30px 30px rgba(16,37,50,.18))}
+    .facts-carton .cshadow{bottom:-10%;opacity:.45}
   }
+  /* ── mode theatre ── */
+  .modes{position:relative;background:var(--paper-2);color:var(--ink)}
+  .m-head{display:grid;gap:12px;padding-block:clamp(56px,8vw,96px) 12px}
+  .m-dots{display:none}
+  .m-track{display:grid}
+  .m-panel{position:relative;padding:28px var(--gutter) 56px;display:grid;gap:18px;overflow:hidden;border-top:1px solid var(--rule)}
+  .m-word::before{content:attr(data-text)}
+  .m-word{position:absolute;left:var(--gutter);top:6px;font:700 clamp(6rem,30vw,22rem)/.8 var(--display);text-transform:uppercase;color:rgba(16,37,50,.035);-webkit-text-stroke:1.5px rgba(16,37,50,.22);letter-spacing:-.01em;pointer-events:none;white-space:nowrap}
+  .m-obj{position:relative;z-index:1;margin-top:clamp(40px,12vw,120px)}
+  .m-obj :global(img){width:100%;height:auto;position:relative;z-index:1}
+  .m-train .m-obj{width:170%;margin-left:-10%}
+  .m-word{z-index:0}
+  .m-obj .oshadow{bottom:-2%;opacity:.5}
+  .m-copy{position:relative;z-index:2;display:grid;gap:10px;max-width:520px}
+  .m-k{font-size:.8125rem;color:var(--link)}
+  .m-ground{display:none}
+  @media (min-width:900px){
+    .modes.is-pin{height:460vh}
+    .modes.is-pin .m-stick{position:sticky;top:var(--header-h);height:calc(100svh - var(--header-h));overflow:hidden;display:grid;grid-template-rows:auto 1fr;grid-template-columns:minmax(0,1fr)}
+    .is-pin .m-head{grid-template-columns:1fr auto;align-items:end;padding-block:clamp(20px,4vh,44px) 0;width:100%}
+    .is-pin .m-head .eyebrow{grid-column:1/-1}
+    .is-pin .m-dots{display:flex;gap:6px;list-style:none;margin:0;padding:0}
+    .is-pin .m-dots li{font:600 .75rem var(--body);letter-spacing:.1em;text-transform:uppercase;padding:8px 12px;border:1.5px solid var(--rule-strong);border-radius:999px;color:var(--muted);transition:all .3s var(--ease)}
+    .is-pin .m-dots li.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+    .is-pin .m-track{display:flex;width:400vw;height:100%;will-change:transform;position:relative}
+    .is-pin .m-panel{flex:0 0 100vw;height:100%;border:0;padding:0 var(--gutter);display:block;overflow:visible}
+    .is-pin .m-word{top:auto;bottom:18%;left:4vw;font-size:min(34vw,62vh);will-change:transform}
+    .is-pin .m-obj{position:absolute;margin:0;left:42vw;bottom:15.5%;width:min(44vw,72vh);will-change:transform}
+    .is-pin .m-van .m-obj{width:min(38vw,64vh);left:46vw}
+    .is-pin .m-train .m-obj{width:118vw;left:30vw;bottom:15.2%}
+    .is-pin .m-plane .m-obj{width:62vw;left:32vw;bottom:30%}
+    .is-pin .m-plane .oshadow{bottom:-60%;opacity:.25}
+    .is-pin .m-copy{position:absolute;left:var(--gutter);top:14%;width:min(34vw,460px)}
+    .is-pin .m-ground{display:block;position:absolute;left:0;right:0;bottom:0;height:16%;background:linear-gradient(180deg,#d9d5c9,#cfcabd);border-top:2px solid var(--ink)}
+    .is-pin .m-lane{position:absolute;left:0;width:400vw;top:38%;height:4px;background:repeating-linear-gradient(90deg,var(--ink) 0 64px,transparent 64px 104px);will-change:transform}
+  }
+  @media (min-width:900px){.modes:not(.is-pin) .m-panel{grid-template-columns:1fr 1.3fr;align-items:center}.modes:not(.is-pin) .m-copy{order:-1}}
   /* ── network ── */
   .net-copy{grid-column:1/-1;display:grid;gap:18px;align-content:start}
   .net-tools{display:grid;gap:16px;margin-top:8px}

@@ -1,0 +1,18 @@
+---
+// Transparent cut-out object (AVIF/WebP with alpha). Decorative unless `alt` is given.
+import { getImage } from 'astro:assets';
+const all = import.meta.glob('../assets/cut/*.png', { eager: true }) as Record<string, { default: ImageMetadata }>;
+interface Props { name: string; alt?: string; widths?: number[]; sizes?: string; class?: string; priority?: boolean; style?: string; [k: string]: any }
+const { name, alt = '', widths = [400, 800, 1400], sizes = '50vw', class: cls, priority = false, style, ...rest } = Astro.props;
+const src = Object.entries(all).find(([k]) => k.endsWith(`/${name}.png`))![1].default;
+const ws = widths.filter((w) => w <= src.width); if (!ws.length) ws.push(src.width);
+const set = async (format: 'avif' | 'webp', q: number) => (await Promise.all(ws.map(async (w) => `${(await getImage({ src, width: w, format, quality: q })).src} ${w}w`))).join(', ');
+const avif = await set('avif', 60), webp = await set('webp', 78);
+const fb = await getImage({ src, width: ws[Math.min(1, ws.length - 1)], format: 'webp', quality: 78 });
+const h = Math.round((src.height / src.width) * ws[Math.min(1, ws.length - 1)]);
+---
+<picture class={cls} style={style} {...rest}>
+  <source type="image/avif" srcset={avif} sizes={sizes} />
+  <source type="image/webp" srcset={webp} sizes={sizes} />
+  <img src={fb.src} width={ws[Math.min(1, ws.length - 1)]} height={h} alt={alt} aria-hidden={alt ? undefined : 'true'} loading={priority ? 'eager' : 'lazy'} decoding="async" fetchpriority={priority ? 'high' : undefined} draggable="false" />
+</picture>

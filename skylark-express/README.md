@@ -25,6 +25,8 @@ npm run build           # production build → dist/  (tools fall back to phone/
 | Photography | replace files in `src/assets/img/` keeping the same names; responsive AVIF/WebP/JPEG are generated at build |
 | Film shots, edit, titles, sound | `media-src/clips/`, `scripts/build-film.py`, `scripts/film-graphics.mjs` → `npm run film` |
 | Scroll-scrubbed journey footage | `scripts/build-scrub.py` |
+| Cut-out objects (aircraft, truck, van, train, carton, pallet, air pallet, forklift, low-loader, crate, skyline) | `src/assets/cut/*.png` (transparent PNG masters; AVIF/WebP with alpha generated at build). Replace a file with the same name to swap an object |
+| Page titles, descriptions, share images | each page’s `<Base title description>`; service titles in `src/data/services.ts` (`seoTitle`); head and schema in `src/layouts/Base.astro` |
 | India map geometry | `map-src/` + `npm run map` |
 | Colours, type, spacing | `src/styles/global.css` (`:root` tokens) |
 
@@ -45,7 +47,7 @@ Each tool is configured independently in `src/config/integrations.ts` from `PUBL
 
 ## Items the operator must supply or confirm before launch
 
-1. **Founder portrait pairing.** The two portraits were paired with the names in the order they were attached (first: Mr. Rakesh Yadav, second: Mr. Naveen Yadav). If that is wrong, swap the two `portrait` values in `src/data/company.ts`.
+1. **Founder portraits** are paired as confirmed by the client: Mr. Rakesh Yadav is the city-background portrait, Mr. Naveen Yadav the white-background portrait (`src/data/company.ts`).
 2. Production endpoints and credentials for tracking, POD, PIN and forms (table above).
 3. Company-approved **conditions of carriage**, exclusions and liability text for `/terms` (currently a marked placeholder).
 4. Privacy page: name any analytics, forms or tracking vendor that is connected, and have it reviewed.
@@ -74,3 +76,12 @@ Run `node tests/run.mjs --perf` to reproduce. Measured on this build:
 | Laptop 1440×900, 10 Mbps, 40 ms RTT | 0.28 s | 0 | 6 KB | 294 KB |
 
 These are lab numbers from a local server. Field Core Web Vitals (LCP, INP, CLS at the 75th percentile) need real traffic.
+
+## SEO
+
+- Unique, keyword-led title (≤ 65 characters) and description (70–165 characters) on every page; brand suffix added once.
+- Canonical, `hreflang` en-IN + x-default, Open Graph and Twitter cards with image alt text; each service page shares its own 1200×630 image.
+- JSON-LD on every page: Organization + LocalBusiness (address, geo, hours, phones), WebSite, WebPage/AboutPage/ContactPage, BreadcrumbList; plus Service, FAQPage, JobPosting and per-branch LocalBusiness where relevant.
+- `sitemap.xml` with `lastmod` and priorities; `robots.txt` points to it and keeps tracking/PIN query URLs out of the index; `site.webmanifest`.
+- Preview builds (`npm run build:preview`) are deliberately `noindex`. Deploy the output of `npm run build`, which is indexable.
+- After launch: submit the sitemap in Google Search Console and create a Google Business Profile for the Gurugram headquarters using the same name, address and phone.

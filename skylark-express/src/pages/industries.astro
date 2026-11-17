@@ -5,7 +5,7 @@ import Pic from '../components/Pic.astro';
 import CTA from '../components/CTA.astro';
 import { industries } from '../data/industries';
 ---
-<Base title="Industries" description="How Skylark Express handles healthcare and pharma, IT and electronics, FMCG and retail, chemicals, automation and energy, and documented cargo.">
+<Base title="Industries We Serve: Pharma, FMCG, Chemicals" description="Logistics for healthcare and pharma, IT and electronics, FMCG and retail, chemicals, automation and energy, with documented handovers across India.">
   <PageHero eyebrow="Industries" title="Every sector asks a different question at the handover." lede="Six sectors, the cargo concerns that come with each, and the services that answer them.">
     <nav aria-label="Sectors on this page"><ul class="ind-nav" role="list">{industries.map((i) => <li><a href={`#${i.id}`}>{i.name}</a></li>)}</ul></nav>
   </PageHero>

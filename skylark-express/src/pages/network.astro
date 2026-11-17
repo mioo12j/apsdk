@@ -11,7 +11,7 @@ const principal = offices.filter((o) => o.kind === 'hq' || o.kind === 'registere
 const byRegion = regionOrder.map((r) => ({ r, list: offices.filter((o) => o.region === r && o.kind !== 'hq' && o.kind !== 'registered') })).filter((g) => g.list.length);
 const jsonld = offices.filter((o) => o.address).map((o) => ({ '@context': 'https://schema.org', '@type': 'LocalBusiness', name: `Skylark Express – ${o.label}`, parentOrganization: { '@id': ORIGIN + '/#organization' }, telephone: telHref(o.phone!).slice(4), address: { '@type': 'PostalAddress', streetAddress: o.address, postalCode: o.pin, addressRegion: o.state, addressCountry: 'IN' }, url: `${ORIGIN}/network#${o.id}` }));
 ---
-<Base title="Network and branches" description="Find a Skylark Express branch: corporate headquarters in Gurugram, registered office in New Delhi, published branches and listed cities across India." jsonld={jsonld}>
+<Base title="Branches: Gurugram, Delhi, Mumbai, Kolkata" description="Find a Skylark Express branch: Gurugram headquarters, New Delhi registered office, and branches in Mumbai (Bhiwandi), Kolkata, Bengaluru, Punjab and more." jsonld={jsonld}>
   <PageHero eyebrow="The network" title="Find a branch" lede="Search by city, region, alternative spelling or PIN code. The map and the directory show the same records." />
   <section class="section-tight net" data-network="full" data-view="list" style="padding-top:0">
     <OfficeData />
