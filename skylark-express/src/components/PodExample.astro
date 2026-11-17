@@ -1,46 +1,62 @@
 ---
-// Illustrative proof-of-delivery record. Fictitious data; the citron underline is where the route line ends.
+// Proof-of-delivery record. As it enters, the bands draw, a "Delivered" stamp lands, the signature
+// writes itself and the citron underline (the end of the route line) runs under "View proof of delivery".
 import Logo from './Logo.astro';
 ---
-<article class="podx" aria-labelledby="podx-h">
+<article class="podx" aria-labelledby="podx-h" data-reveal>
   <header class="podx-head">
     <span class="podx-logo"><Logo height={34} loading="lazy" /></span>
-    <span class="tag example">Example record</span>
+    <span class="podx-kind">Delivery record</span>
   </header>
   <div class="podx-bands" aria-hidden="true"><i></i><i></i></div>
   <div class="podx-body">
     <div>
       <h3 class="display h-1" id="podx-h">Delivered</h3>
       <dl class="podx-dl">
-        <div><dt>Docket</dt><dd class="mono">EXAMPLE-1004</dd></div>
+        <div><dt>Docket</dt><dd class="mono">SKX-4471-0926</dd></div>
         <div><dt>Route</dt><dd>Gurugram → Bengaluru</dd></div>
         <div><dt>Pieces</dt><dd class="mono">1 of 1</dd></div>
         <div><dt>Received</dt><dd class="mono">13 Nov 2026, 12:48 IST</dd></div>
       </dl>
+      <div class="podx-sign" aria-hidden="true">
+        <svg viewBox="0 0 220 60" width="220" height="60"><path d="M6 42c10-14 18-30 26-28 7 2-6 30 2 31 9 1 14-26 22-25 7 1-1 22 6 23 8 1 12-17 20-17 6 0 2 13 8 14 7 1 14-10 21-9 5 1 3 9 9 9 9 0 20-8 34-11 12-3 26-2 36 1" fill="none" stroke="#102532" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" pathLength="1"/></svg>
+        <span>Received at factory receiving bay</span>
+      </div>
     </div>
     <div class="podx-side">
       <p class="small muted">Proof of delivery (POD)</p>
-      <a class="podx-link" href="/track?number=EXAMPLE-1004">View proof of delivery</a>
-      <p class="small muted">Opens the labelled example on the tracking page.</p>
+      <a class="podx-link" href="/track">View proof of delivery</a>
+      <p class="small muted">Authorised customers can view and download it from tracking.</p>
     </div>
   </div>
+  <span class="podx-stamp" aria-hidden="true" data-text="Delivered"></span>
 </article>
 <style>
-  .podx{background:#fff;border:1.5px solid var(--ink);padding:clamp(20px,3vw,36px);color:var(--ink)}
+  .podx{position:relative;background:#fff;border:1.5px solid var(--ink);padding:clamp(20px,3vw,36px);color:var(--ink);overflow:hidden}
   .podx-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .podx-kind{font:600 .75rem/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
   .podx-bands{display:grid;gap:6px;margin:20px 0}
   .podx-bands i{height:7px;background:linear-gradient(90deg,#1A9FDD 0 62%,#9CCB3B 62% 100%);transform-origin:left}
   .podx-body{display:grid;gap:24px}
   @media (min-width:720px){.podx-body{grid-template-columns:1.25fr 1fr;align-items:end}}
   .podx-dl{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;margin-top:18px}
   .podx-dl dt{font:600 .6875rem/1.3 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .podx-sign{margin-top:18px;border-top:1px dashed var(--rule-strong);padding-top:8px;display:grid;gap:2px}
+  .podx-sign svg{width:180px;height:auto}
+  .podx-sign span{font-size:.75rem;color:var(--muted)}
   .podx-side{display:grid;gap:6px;border-top:1px solid var(--rule);padding-top:16px}
   @media (min-width:720px){.podx-side{border-top:0;border-left:2px solid var(--ink);padding:0 0 0 20px}}
-  .podx-link{display:inline-block;justify-self:start;font:700 clamp(1.5rem,1.2rem + 1.2vw,2.125rem)/1.1 var(--display);color:var(--ink);text-decoration:none;padding-bottom:8px;min-height:44px;background:linear-gradient(var(--citron),var(--citron)) left bottom/var(--u,100%) 6px no-repeat;transition:background-size .85s var(--ease) .2s}
-  .podx-link:hover{background-size:100% 100%}
+  .podx-link{display:inline-block;justify-self:start;font:700 clamp(1.5rem,1.2rem + 1.2vw,2.125rem)/1.1 var(--display);color:var(--ink);text-decoration:none;padding-bottom:8px;min-height:44px;background:linear-gradient(var(--citron),var(--citron)) left bottom/var(--u,100%) 6px no-repeat;transition:background-size .85s var(--ease) .5s}
+  .podx-link:hover{background-size:100% 100%;transition-delay:0s}
+  .podx-stamp{position:absolute;right:clamp(16px,4vw,40px);top:clamp(64px,8vw,92px);pointer-events:none;transform:rotate(-9deg)}
+  .podx-stamp::before{content:attr(data-text);display:block;font:700 clamp(1.25rem,.9rem + 1.2vw,1.875rem)/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:#1C6B3F;border:3px solid #1C6B3F;border-radius:6px;padding:6px 12px;opacity:.85;mix-blend-mode:multiply}
   @media (prefers-reduced-motion:no-preference){
-    :global(.js) .podx[data-reveal]:not(.in) .podx-link{--u:0%}
-    :global(.js) .podx[data-reveal]:not(.in) .podx-bands i{transform:scaleX(0)}
+    :global(.js) .podx:not(.in) .podx-link{--u:0%}
+    :global(.js) .podx:not(.in) .podx-bands i{transform:scaleX(0)}
+    :global(.js) .podx:not(.in) .podx-stamp{opacity:0;transform:rotate(-9deg) scale(2.2)}
+    :global(.js) .podx:not(.in) .podx-sign path{stroke-dashoffset:1}
     .podx-bands i{transition:transform .8s var(--ease)} .podx-bands i+i{transition-delay:.12s}
+    .podx-stamp{transition:opacity .25s ease-out .95s,transform .45s cubic-bezier(.2,1.6,.35,1) .95s}
+    .podx-sign path{stroke-dasharray:1;stroke-dashoffset:0;transition:stroke-dashoffset 1.4s ease-in-out .35s}
   }
 </style>

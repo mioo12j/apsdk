@@ -6,7 +6,7 @@ import { faqs, checklist } from '../data/faqs';
 const jsonld = [{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }];
 ---
 <Base title="Shipping FAQs: FTL vs PTL, Tracking, POD" description="Answers on tracking, proof of delivery, FTL versus PTL, cold chain, project cargo, PIN-code coverage and API integration, plus a shipping checklist." jsonld={jsonld}>
-  <PageHero eyebrow="Help" title="Plain answers before you ship." lede="If your question is not here, the team is a call away." />
+  <PageHero cut="uld" eyebrow="Help" title="Plain answers before you ship." lede="If your question is not here, the team is a call away." />
   <section class="section-tight" style="padding-top:0">
     <div class="wrap grid">
       <div class="h-faq">

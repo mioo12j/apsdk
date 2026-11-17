@@ -15,7 +15,7 @@ const topics = [
 ];
 ---
 <Base title="Contact Skylark Express: +91 11 4166 6666" description="Call +91 11 4166 6666 or +91 84488 99679, email info@skylarkexpressdelhi.com, or visit our Gurugram headquarters. Sales, shipment support and careers.">
-  <PageHero eyebrow="Contact" title="Reach the right team first time." lede={`Call centre hours are ${company.hours.display}. ${company.responseTarget}`} />
+  <PageHero video="dusk" cut="truck" cutMobile={false} eyebrow="Contact" title="Reach the right team first time." lede={`Call centre hours are ${company.hours.display}. ${company.responseTarget}`} />
   <section class="section-tight" style="padding-top:0">
     <div class="wrap grid">
       <div class="ct-main">
@@ -27,8 +27,6 @@ const topics = [
         </ul>
         <form class="ct-form" data-contact data-mode={mode} novalidate>
           <h2 class="display h-2">Send a message</h2>
-          {mode === 'offline' && <p class="notice">This form prepares an email in your own mail app, addressed to the team you choose. Nothing is sent until you press send there.</p>}
-          {mode === 'test' && <p class="notice warn"><strong>Test environment.</strong> Messages go to a local test API. Nothing reaches Skylark Express.</p>}
           <div class="notice bad" role="alert" data-c-summary hidden tabindex="-1"></div>
           <div class="field"><label for="c-topic">What is this about?</label>
             <select class="input" id="c-topic" name="topic">{topics.map((t) => <option value={t.id} data-to={t.to}>{t.label}</option>)}</select>
@@ -41,6 +39,7 @@ const topics = [
             <div class="field"><label for="c-reach">Phone or email</label><input class="input" id="c-reach" name="reach" autocomplete="email" required maxlength="120" /><p class="err" hidden></p></div>
           </div>
           <button class="btn btn-primary" type="submit" data-c-submit>{mode === 'offline' ? 'Open email draft' : 'Send message'}</button>
+          {mode === 'offline' && <p class="small muted">Opens an email in your mail app, addressed to the team you choose.</p>}
           <div role="status" aria-live="polite" data-c-status></div>
         </form>
         <div class="ct-done" data-c-done hidden tabindex="-1"></div>
@@ -50,6 +49,7 @@ const topics = [
           <h2 class="display h-2">Call centre</h2>
           <ul role="list">{company.phones.map((p) => <li><a class="ct-tel" href={`tel:${p.tel}`}>{p.display}</a></li>)}</ul>
           <p>{company.hours.display}</p>
+          <p class="open-status" data-open-status></p>
           <p><a href={`mailto:${company.email}`}>{company.email}</a></p>
           <p class="small muted">If an online tool is unavailable, either number reaches the team directly.</p>
         </div>

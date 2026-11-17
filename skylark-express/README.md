@@ -25,6 +25,8 @@ npm run build           # production build → dist/  (tools fall back to phone/
 | Photography | replace files in `src/assets/img/` keeping the same names; responsive AVIF/WebP/JPEG are generated at build |
 | Film shots, edit, titles, sound | `media-src/clips/`, `scripts/build-film.py`, `scripts/film-graphics.mjs` → `npm run film` |
 | Scroll-scrubbed journey footage | `scripts/build-scrub.py` |
+| Background video loops (page headers, service pages, closing, 404) | `scripts/build-loops.py` → `public/media/loops/{name}-720.mp4` / `-480.mp4` + poster `src/assets/img/loop-{name}.jpg`. Choose a loop per page with `<PageHero video="…">` or `<LoopVideo name="…">` |
+| Inline film (Home and About) | `src/components/Showreel.astro`; encodes `the-handover-reel-*.mp4` are cut from the clean edit by `scripts/build-film.py` |
 | Cut-out objects (aircraft, truck, van, train, carton, pallet, air pallet, forklift, low-loader, crate, skyline) | `src/assets/cut/*.png` (transparent PNG masters; AVIF/WebP with alpha generated at build). Replace a file with the same name to swap an object |
 | Page titles, descriptions, share images | each page’s `<Base title description>`; service titles in `src/data/services.ts` (`seoTitle`); head and schema in `src/layouts/Base.astro` |
 | India map geometry | `map-src/` + `npm run map` |
@@ -85,3 +87,10 @@ These are lab numbers from a local server. Field Core Web Vitals (LCP, INP, CLS 
 - `sitemap.xml` with `lastmod` and priorities; `robots.txt` points to it and keeps tracking/PIN query URLs out of the index; `site.webmanifest`.
 - Preview builds (`npm run build:preview`) are deliberately `noindex`. Deploy the output of `npm run build`, which is indexable.
 - After launch: submit the sitemap in Google Search Console and create a Google Business Profile for the Gurugram headquarters using the same name, address and phone.
+
+## Motion and video
+
+- **Where video plays:** the inline film on Home and About (muted, only while on screen; “Watch with sound” opens the full player); the scroll-played journey on Home; background loops in the headers of About, Services, every service page, Industries, Network, Technology, Careers and Contact, behind the closing section on Home, and on the 404 page.
+- **Loading:** nothing streams until a video is near the viewport, phones get the 480p loop, and nothing streams with reduced motion or data saver (the poster frame shows instead).
+- **Control:** every background video has its own pause button; the footer’s “Pause animations” stops all looping motion and video site-wide and is remembered on the visitor’s device.
+- **Site-wide motion:** page-to-page transitions; word-by-word headlines; floating cut-out objects; titles, eyebrows and lists animate in as they enter; counters count up; photo parallax; tilt cards; a header progress line with a small Skylark van; a scroll-driven ticker and footer marquee; a van that drives along the footer lane; an animated India map with a pulsing headquarters; a stamped and signed delivery record; a shipment progress rail on tracking results; the chosen service’s object on the quote form; live “Open now” status from the published hours (IST); a quick-action bar (Track · Get a quote · Call) on phones.

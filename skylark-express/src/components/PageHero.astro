@@ -1,13 +1,68 @@
 ---
-interface Props { eyebrow?: string; title: string; lede?: string; crumbs?: { href: string; label: string }[]; dark?: boolean }
-const { eyebrow, title, lede, crumbs = [], dark = false } = Astro.props;
+// Interior page header: optional background footage, a word-by-word headline and floating cut-out objects.
+import Cut from './Cut.astro';
+import LoopVideo from './LoopVideo.astro';
+interface Props { eyebrow?: string; title: string; lede?: string; crumbs?: { href: string; label: string }[]; dark?: boolean; video?: string; videoAlt?: string; cut?: string | string[]; cutMobile?: boolean }
+const { eyebrow, title, lede, crumbs = [], dark = false, video, videoAlt = '', cut, cutMobile = true } = Astro.props;
+const cuts = cut ? (Array.isArray(cut) ? cut : [cut]) : [];
+const words = title.split(' ');
+const drifts = ['-0.12', '-0.2', '-0.3'];
 ---
-<section class:list={['page-hero', { dark }]}>
-  <div class="wrap stack" style="--s:18px">
+<section class:list={['page-hero', 'ph', { dark: dark || !!video, 'has-video': !!video, 'has-cut': cuts.length > 0 }]}>
+  {video && <LoopVideo name={video} alt={videoAlt} class="bg ph-video" priority label="header video" />}
+  {cuts.length > 0 && (
+    <div class:list={['ph-cuts', `n${cuts.length}`, { 'no-mobile': !cutMobile }]} aria-hidden="true">
+      {cuts.map((c, i) => <div class={`ph-cut ph-cut-${i}`} data-drift={drifts[i]}><span class="ph-shadow"></span><Cut name={c} priority={i === 0} sizes="(min-width:900px) 34vw, 70vw" widths={[400, 700, 1100]} /></div>)}
+    </div>
+  )}
+  <div class="wrap stack ph-in" style="--s:18px">
     {crumbs.length > 0 && <nav aria-label="Breadcrumb"><ol class="crumbs" role="list"><li><a href="/">Home</a></li>{crumbs.map((c) => <li><a href={c.href}>{c.label}</a></li>)}</ol></nav>}
     {eyebrow && <p class="eyebrow">{eyebrow}</p>}
-    <h1 class="display h-page">{title}</h1>
+    <h1 class="display h-page ph-title">{words.map((w, i) => <><span class="w"><span style={`--i:${i}`}>{w}</span></span>{i < words.length - 1 ? ' ' : ''}</>)}</h1>
     {lede && <p class="lede">{lede}</p>}
     <slot />
   </div>
 </section>
+<style>
+  .ph{position:relative;isolation:isolate;overflow:clip}
+  .ph-in{position:relative;z-index:2}
+  .ph-title .w{display:inline-block;overflow:hidden;vertical-align:bottom;padding:0 .03em .14em;margin:0 -.03em -.14em}
+  .ph-title .w>span{display:inline-block;animation:phWord 1s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(80ms + var(--i) * 55ms)}
+  .ph-in>:not(h1){animation:phFade .9s var(--ease) both;animation-delay:.32s}
+  .ph-in>nav{animation-delay:0s}
+  @keyframes phWord{from{transform:translateY(112%) rotate(3deg)}to{transform:none}}
+  @keyframes phFade{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  /* video header */
+  .has-video{padding-block:clamp(72px,12vw,168px) clamp(40px,6vw,80px);min-height:min(68vh,640px);display:grid;align-items:end;background:var(--navy)}
+  .has-video :global(.ph-video){position:absolute;inset:0;z-index:-1}
+  .has-video :global(.ph-video img),.has-video :global(.ph-video video){opacity:.62}
+  .has-video :global(.loopv-shade){background:linear-gradient(90deg,rgba(11,32,44,.94) 0%,rgba(11,32,44,.78) 38%,rgba(11,32,44,.25) 75%,rgba(11,32,44,.4) 100%),linear-gradient(0deg,rgba(11,32,44,.85) 0%,rgba(11,32,44,0) 45%)}
+  .has-video :global(.loopv-btn){z-index:4}
+  /* floating objects */
+  .ph-cuts{position:relative;z-index:1;pointer-events:none}
+  .ph-cut{position:relative}
+  .ph-cut :global(picture){display:block;animation:cutIn 1.5s cubic-bezier(.16,.84,.3,1) .25s both}
+  .ph-cut :global(img){width:100%;height:auto;position:relative;z-index:1;animation:phFloat 7s ease-in-out infinite;filter:drop-shadow(0 26px 30px rgba(4,14,20,.35))}
+  .ph-cut-1 :global(picture){animation-delay:.4s}.ph-cut-2 :global(picture){animation-delay:.55s}
+  .ph-cut-1 :global(img){animation-delay:-2.3s}.ph-cut-2 :global(img){animation-delay:-4.1s}
+  .ph-shadow{position:absolute;left:14%;right:14%;bottom:-3%;height:9%;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.45),rgba(0,0,0,0));filter:blur(7px)}
+  @keyframes cutIn{from{opacity:0;transform:translate(10vw,3vh) rotate(-3deg) scale(.94)}to{opacity:1;transform:none}}
+  @keyframes phFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+  @media (max-width:899px){
+    .has-cut{display:flex;flex-direction:column}
+    .ph-cuts{order:2;width:min(76vw,420px);margin:8px var(--gutter) 0 auto}
+    .ph-cuts.n3{height:52vw;width:auto;margin-inline:var(--gutter)}
+    .ph-cuts.no-mobile{display:none}
+    .has-video{min-height:0}
+  }
+  @media (min-width:900px){
+    .ph-cuts{position:absolute;right:calc(var(--gutter) + 1vw);top:50%;transform:translateY(-42%);width:min(34vw,520px)}
+    .has-cut .ph-in>*{max-width:min(56vw,860px)}
+    .ph-cuts.n3{width:min(48vw,720px);height:min(30vw,440px);top:52%}
+  }
+  .n3 .ph-cut{position:absolute}
+  .n3 .ph-cut-0{left:2%;right:0;bottom:30%}
+  .n3 .ph-cut-1{right:4%;bottom:-4%;width:50%}
+  .n3 .ph-cut-2{right:0;top:-10%;width:64%}
+  .dark .ph-shadow{background:radial-gradient(closest-side,rgba(0,0,0,.7),rgba(0,0,0,0))}
+</style>

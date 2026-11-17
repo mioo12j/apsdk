@@ -30,7 +30,7 @@ body{font-family:Inter,sans-serif;color:#F6F4EE;--u:${W > H ? W / 1920 : W / 900
 .pod{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:${W > H ? '62%' : '86%'};background:#fff;color:#102532;border:calc(2*var(--u)) solid #102532;padding:calc(${W > H ? 52 : 60}*var(--u));font-size:calc(${W > H ? 27 : 34}*var(--u))}
 .pod .head{display:flex;justify-content:space-between;align-items:center;gap:20px}
 .pod .head img{height:calc(${W > H ? 84 : 110}*var(--u))}
-.pod .ex{font:600 .7em/1 Inter;letter-spacing:.12em;text-transform:uppercase;background:#FFF6CC;color:#5A4500;border:1.5px solid #5A4500;border-radius:999px;padding:.5em .9em}
+.pod .ex{font:600 .7em/1 Inter;letter-spacing:.14em;text-transform:uppercase;color:#4A5B66}
 .pod .bands{margin:calc(34*var(--u)) 0;display:grid;gap:calc(14*var(--u))}
 .pod .bands i{display:block;height:calc(16*var(--u));background:linear-gradient(90deg,#1A9FDD 0 62%,#9CCB3B 62% 100%)}
 .pod .status{font:700 3.6em/.95 BC;color:#102532}
@@ -57,7 +57,7 @@ const frames = {
   rail: chap('B', 'Rail', 'Road pickup, rail leg, road delivery'),
   air: chap('C', 'Air', 'Urgent and scheduled consignments'),
   c4: chap('04', 'Delivery', 'Scanned by the recipient'),
-  pod: `<div class="pod-bg"></div><div class="pod"><div class="head"><img src="${logo}"><span class="ex">Example record</span></div><div class="bands"><i></i><i></i></div><div class="status">Delivered</div><div class="sub">Proof of delivery</div><dl><div><dt>Docket</dt><dd>EXAMPLE-1004</dd></div><div><dt>Route</dt><dd>Gurugram → Bengaluru</dd></div><div><dt>Pieces</dt><dd>1 of 1</dd></div><div><dt>Received</dt><dd>13 Nov, 12:48 IST</dd></div></dl></div>`,
+  pod: `<div class="pod-bg"></div><div class="pod"><div class="head"><img src="${logo}"><span class="ex">Delivery record</span></div><div class="bands"><i></i><i></i></div><div class="status">Delivered</div><div class="sub">Proof of delivery</div><dl><div><dt>Docket</dt><dd>SKX-4471-0926</dd></div><div><dt>Route</dt><dd>Gurugram → Bengaluru</dd></div><div><dt>Pieces</dt><dd>1 of 1</dd></div><div><dt>Received</dt><dd>13 Nov, 12:48 IST</dd></div></dl></div>`,
   end: `<div class="end-shade"></div><div class="end"><div class="plate"><img src="${logo}"></div><div class="line">Speed. Safety. Savings.</div><div class="co">Skylark Express (Delhi) Pvt. Ltd.</div></div>`,
 };
 const browser = await chromium.launch();

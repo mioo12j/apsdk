@@ -24,11 +24,6 @@ const mode = integrations.pin.mode;
       </form>
       <div role="status" aria-live="polite" data-pin-out class="pin-out"></div>
       <noscript><div class="notice warn"><p class="notice-h">The PIN check needs JavaScript.</p><Human lead="Ask our team about a PIN code:" /></div></noscript>
-      <section class="pin-ex">
-        <h2 class="display h-3">Try an example <span class="tag example">Controlled test data</span></h2>
-        <p class="small muted">These results are fixed examples used to show each outcome{mode === 'offline' ? '. The live lookup is not connected in this build, so any other PIN returns “not confirmed”.' : '.'}</p>
-        <p class="cluster">{Object.entries(examplePins).map(([p, v]) => <a class="mono ex-a" href={`/serviceability?pin=${p}`}>{p}<span class="sr-only">, example: {v.status}</span></a>)}<a class="mono ex-a" href="/serviceability?pin=799001">799001<span class="sr-only">, example: no record</span></a></p>
-      </section>
       <p><a class="link-arrow" href="/network">Find a branch instead <span aria-hidden="true">→</span></a></p>
     </div>
   </section>

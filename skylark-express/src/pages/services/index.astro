@@ -6,7 +6,7 @@ import CTA from '../../components/CTA.astro';
 import { services } from '../../data/services';
 ---
 <Base title="Logistics Services: Road, Rail, Air, Storage" description="Six logistics services from Skylark Express: FTL and PTL road freight, rail and air cargo, warehousing, project cargo and specialist packaging across India.">
-  <PageHero eyebrow="Six service lines" title="What are you moving?" lede="Start with your situation. The selector points you to the service that fits; every page ends with an enquiry that goes to the right team." />
+  <PageHero video="road" cut={["train", "truck", "plane"]} eyebrow="Six service lines" title="What are you moving?" lede="Start with your situation. The selector points you to the service that fits; every page ends with an enquiry that goes to the right team." />
   <section class="section-tight" aria-labelledby="sel-h">
     <div class="wrap">
       <h2 class="display h-2" id="sel-h">Service selector</h2>
@@ -35,7 +35,7 @@ import { services } from '../../data/services';
       <ul class="all" role="list">
         {services.map((s) => (
           <li data-reveal>
-            <a href={`/services/${s.slug}`} class="all-a">
+            <a href={`/services/${s.slug}`} class="all-a" data-tilt>
               <span class="all-pic"><Pic name={s.image} alt="" ratio={4 / 3} widths={[400, 700]} sizes="(min-width:900px) 30vw, (min-width:600px) 46vw, 92vw" /></span>
               <span class="mono small">{s.index}</span>
               <span class="display h-2">{s.name}</span>
@@ -49,6 +49,8 @@ import { services } from '../../data/services';
   </section>
   <CTA />
   <script>
+    document.querySelectorAll<HTMLAnchorElement>('.all-a').forEach((a) => a.addEventListener('click', () => { const i = a.querySelector<HTMLElement>('.all-pic img'); if (i) i.style.viewTransitionName = 'service-hero'; }));
+    addEventListener('pageshow', () => document.querySelectorAll<HTMLElement>('.all-pic img').forEach((i) => (i.style.viewTransitionName = '')));
     const root = document.querySelector('[data-selector]');
     root?.querySelectorAll<HTMLButtonElement>('[data-sel]').forEach((b) => b.addEventListener('click', () => {
       root.querySelectorAll('[data-sel]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
@@ -70,7 +72,7 @@ import { services } from '../../data/services';
   .all{display:grid;gap:32px 24px;margin-top:24px}
   @media (min-width:600px){.all{grid-template-columns:repeat(2,1fr)}}
   @media (min-width:900px){.all{grid-template-columns:repeat(3,1fr)}}
-  .all-a{display:grid;gap:6px;text-decoration:none;color:var(--ink)}
+  .all-a{position:relative;display:grid;gap:6px;text-decoration:none;color:var(--ink);padding:10px;margin:-10px;border-radius:6px}
   .all-pic{overflow:hidden;margin-bottom:8px;display:block}
   .all-pic :global(img){width:100%;transition:transform .7s var(--ease)}
   .all-a:hover .all-pic :global(img){transform:scale(1.04)}

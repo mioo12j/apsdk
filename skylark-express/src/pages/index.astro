@@ -8,6 +8,9 @@ import OfficeData from '../components/OfficeData.astro';
 import Founders from '../components/Founders.astro';
 import PodExample from '../components/PodExample.astro';
 import Cut from '../components/Cut.astro';
+import Showreel from '../components/Showreel.astro';
+import LoopVideo from '../components/LoopVideo.astro';
+import Ticker from '../components/Ticker.astro';
 import { company, figures } from '../data/company';
 import { services } from '../data/services';
 import { offices } from '../data/offices';
@@ -42,12 +45,12 @@ const published = offices.filter((o) => o.kind !== 'city').length, listed = offi
       </div>
       <div class="wrap sky-copy" data-layer="copy">
         <p class="eyebrow">{company.brandLine}</p>
-        <h1 class="display sky-h1" id="hero-h"><span class="ln">From the first</span> <span class="ln">pickup to the</span> <span class="ln">final handover.</span></h1>
+        <h1 class="display sky-h1" id="hero-h"><span class="ln"><span style="--i:0">From the first</span></span> <span class="ln"><span style="--i:1">pickup to the</span></span> <span class="ln"><span style="--i:2">final handover.</span></span></h1>
         <p class="lede sky-sub">Skylark brings road, rail and air freight together with warehousing, specialist packaging and project cargo across India.</p>
         <div class="hero-panel"><TrackForm id="hero-track" compact /></div>
         <div class="hero-actions">
           <a class="btn btn-ghost" href="/quote">Get a freight quote <span class="arr" aria-hidden="true">→</span></a>
-          <button class="play-film" type="button" data-film-open><span class="pf-ic" aria-hidden="true"><svg width="12" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z" fill="currentColor"/></svg></span>Play film · 42 seconds</button>
+          <a class="link-arrow hero-link" href="#reel">Watch the film <span class="arr" aria-hidden="true">↓</span></a>
         </div>
       </div>
       <p class="sky-hint" aria-hidden="true"><span class="j-mouse"></span>Scroll</p>
@@ -75,6 +78,9 @@ const published = offices.filter((o) => o.kind !== 'city').length, listed = offi
       <div class="facts-carton" data-layer="carton" aria-hidden="true"><span class="cshadow"></span><Cut name="carton" sizes="(min-width:900px) 30vw, 60vw" /></div>
     </div>
   </section>
+
+  <!-- 02a · The film, inline -->
+  <div id="reel"><Showreel id="home-reel" /></div>
 
   <!-- 02b · The right mode for the load — pinned horizontal theatre -->
   <section class="modes" data-modes aria-labelledby="modes-h">
@@ -127,7 +133,7 @@ const published = offices.filter((o) => o.kind !== 'city').length, listed = offi
         <div class="j-head">
           <p class="eyebrow">Follow a consignment</p>
           <h2 class="display h-1" id="journey-h">Four handovers. One docket.</h2>
-          <p class="small j-meta"><span class="tag example">Illustrative example</span> <a class="j-skip" href="#services">Skip shipment journey</a></p>
+          <p class="small j-meta"><a class="j-skip" href="#services">Skip shipment journey</a></p>
         </div>
         <ol class="j-steps" role="list">
           {journey.map((s, i) => (
@@ -136,7 +142,7 @@ const published = offices.filter((o) => o.kind !== 'city').length, listed = offi
               <div class="j-text">
                 <h3 class="display"><span class="mono j-n">0{i + 1}</span>{s.k}</h3>
                 <p>{s.text}</p>
-                <p class="mono small j-ev">EXAMPLE-1004 · {s.ev}</p>
+                <p class="mono small j-ev">SKX-4471-0926 · {s.ev}</p>
               </div>
             </li>
           ))}
@@ -161,7 +167,7 @@ const published = offices.filter((o) => o.kind !== 'city').length, listed = offi
       <ul class="lift-grid" role="list">
         {services.map((s, i) => (
           <li data-reveal style={`--d:${(i % 3) * 90}ms`}>
-            <a class="lift" href={`/services/${s.slug}`}>
+            <a class="lift" href={`/services/${s.slug}`} data-tilt>
               <span class="lift-top"><span class="mono">{s.index} / 06</span><span class="mono">{s.spec[0][1]}</span></span>
               <span class="lift-obj" aria-hidden="true" data-cut={cutFor[s.slug]}><span class="lshadow"></span><Cut name={cutFor[s.slug]} sizes="(min-width:1100px) 26vw, (min-width:600px) 44vw, 86vw" widths={[400, 700, 1000]} /></span>
               <span class="display lift-name">{s.name}</span>
@@ -173,6 +179,8 @@ const published = offices.filter((o) => o.kind !== 'city').length, listed = offi
       </ul>
     </div>
   </section>
+
+  <Ticker />
 
   <!-- 05 · The network -->
   <section class="section network dark" aria-labelledby="net-h" data-network="home" data-view="list">
@@ -234,14 +242,14 @@ const published = offices.filter((o) => o.kind !== 'city').length, listed = offi
       <div class="arr-copy">
         <p class="eyebrow" data-reveal>Arrival</p>
         <h2 class="display h-1" id="arr-h" data-reveal>The journey ends with a record.</h2>
-        <p class="lede" data-reveal>When the consignee receives the goods, the delivery is recorded and the proof of delivery (POD) is available to authorised customers. This is what an example looks like.</p>
+        <p class="lede" data-reveal>When the consignee receives the goods, the delivery is recorded and the proof of delivery (POD) is available to authorised customers.</p>
       </div>
       <div class="arr-pod" data-reveal><div data-reveal class="podx-wrap"><PodExample /></div></div>
     </div>
   </section>
 
-  <section class="closing dark" aria-labelledby="close-h">
-    <div class="closing-media" data-parallax><Pic name="sunset" alt="A Skylark Express truck parked on a highway lay-by at sunset" sizes="100vw" widths={[640, 1024, 1600, 2200]} /></div>
+  <section class="closing dark" aria-labelledby="close-h" data-spot>
+    <div class="closing-media" data-parallax="8"><LoopVideo name="dusk" class="bg" alt="A Skylark Express truck travelling away along a highway at dusk" label="closing video" /></div>
     <div class="wrap closing-inner">
       <div class="closing-panel" data-reveal>
         <h2 class="display h-page" id="close-h">Tell us what needs to move.</h2>
@@ -294,6 +302,25 @@ const published = offices.filter((o) => o.kind !== 'city').length, listed = offi
   .hero-panel{background:rgba(18,60,70,.86);padding:16px;border-radius:var(--r);border:1px solid var(--rule-dark);backdrop-filter:blur(8px)}
   .hero-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
   .sky-hint{display:none}
+  /* entrance: headline lines rise, the freighter glides in, the truck rolls up to the line */
+  .sky-h1 .ln{overflow:hidden;padding-bottom:.1em;margin-bottom:-.1em}
+  .sky-h1 .ln>span{display:inline-block;animation:lineUp 1s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(140ms + var(--i) * 110ms)}
+  .sky .eyebrow,.sky-sub,.hero-panel,.hero-actions{animation:fadeUp .8s var(--ease) both}
+  .sky .eyebrow{animation-delay:.05s}.sky-sub{animation-delay:.5s}.hero-panel{animation-delay:.6s}.hero-actions{animation-delay:.72s}
+  .sky-plane :global(picture){display:block;animation:planeIn 2.4s cubic-bezier(.16,.84,.3,1) .15s both}
+  .sky-truck :global(picture){display:block;animation:truckIn 2s cubic-bezier(.16,.84,.3,1) .05s both}
+  .sky-skyline{animation:fadeIn 1.6s var(--ease) both}
+  .sky-sun{animation:sunUp 2.6s var(--ease) both}
+  @keyframes lineUp{from{transform:translateY(110%)}to{transform:none}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+  @keyframes planeIn{0%{opacity:0;transform:translate(-48vw,30vh) scale(.5) rotate(8deg)}30%{opacity:1}100%{opacity:1;transform:none}}
+  @keyframes truckIn{0%{transform:translateX(-78vw)}76%{transform:translateX(1.6vw)}88%{transform:translateX(-.4vw)}100%{transform:none}}
+  @keyframes sunUp{from{opacity:0}to{opacity:1}}
+  .hero-link{color:var(--paper)!important;font-weight:600}
+  .hero-link .arr{display:inline-block;animation:nudge 1.8s ease-in-out infinite}
+  @keyframes nudge{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+  /* speed lines trail the vehicles while the theatre is moving */
+  .m-obj::before{content:"";position:absolute;right:92%;top:18%;width:min(28vw,380px);height:56%;z-index:0;pointer-events:none;opacity:var(--vel,0);background:repeating-linear-gradient(180deg,transparent 0 12px,rgba(16,37,50,.35) 12px 14px);-webkit-mask:linear-gradient(90deg,transparent,#000 70%);mask:linear-gradient(90deg,transparent,#000 70%);transition:opacity .2s}
   @keyframes float{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-10px) rotate(-.6deg)}}
   @keyframes idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.5px)}}
   @media (max-width:899px){.sky-sub{order:5}.hero-actions .btn{flex:1 1 100%}.sky .eyebrow{display:none}}
@@ -354,7 +381,7 @@ const published = offices.filter((o) => o.kind !== 'city').length, listed = offi
   .j-still :global(img){width:100%;display:block}
   @media (min-width:900px){.journey:not(.is-cine) .j-steps{grid-template-columns:1fr 1fr;gap:40px 24px}}
   /* cinematic mode: set by home.ts when motion and data settings allow it */
-  .journey.is-cine{height:820vh;padding-block:0}
+  .journey.is-cine{height:380vh;padding-block:0}
   .is-cine .j-sticky{position:sticky;top:var(--header-h);height:calc(100svh - var(--header-h));overflow:hidden}
   .is-cine .j-stage{display:block;position:absolute;inset:0}
   .is-cine .j-frame{position:absolute;inset:0;opacity:0;transition:opacity .5s var(--ease)}
@@ -440,7 +467,7 @@ const published = offices.filter((o) => o.kind !== 'city').length, listed = offi
   .m-k{font-size:.8125rem;color:var(--link)}
   .m-ground{display:none}
   @media (min-width:900px){
-    .modes.is-pin{height:460vh}
+    .modes.is-pin{height:330vh}
     .modes.is-pin .m-stick{position:sticky;top:var(--header-h);height:calc(100svh - var(--header-h));overflow:hidden;display:grid;grid-template-rows:auto 1fr;grid-template-columns:minmax(0,1fr)}
     .is-pin .m-head{grid-template-columns:1fr auto;align-items:end;padding-block:clamp(20px,4vh,44px) 0;width:100%}
     .is-pin .m-head .eyebrow{grid-column:1/-1}
@@ -485,7 +512,9 @@ const published = offices.filter((o) => o.kind !== 'city').length, listed = offi
   .closing{position:relative;isolation:isolate;overflow:clip;display:grid}
   .closing-media{position:absolute;inset:-8% 0;z-index:-1}
   .closing-media :global(img){width:100%;height:100%;object-fit:cover;object-position:70% 50%}
-  .closing::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(11,32,44,.9) 0%,rgba(11,32,44,.6) 45%,rgba(11,32,44,.05) 75%)}
+  .closing-media :global(.loopv-shade){background:linear-gradient(90deg,rgba(11,32,44,.92) 0%,rgba(11,32,44,.62) 45%,rgba(11,32,44,.1) 78%)}
+  .closing-inner{pointer-events:none}.closing-panel{pointer-events:auto}
+  .closing[data-spot]::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(560px circle at var(--mx,30%) var(--my,50%),rgba(213,239,68,.08),transparent 60%)}
   .closing-inner{padding-block:clamp(56px,10vw,140px);min-height:min(88vh,820px);display:grid;align-items:center}
   .closing-panel{display:grid;gap:20px;max-width:640px}
   .closing-contact{display:grid;gap:10px;border-top:1px solid var(--rule-dark);padding-top:18px;margin-top:6px}
@@ -495,11 +524,8 @@ const published = offices.filter((o) => o.kind !== 'city').length, listed = offi
   .closing-contact a{color:var(--paper);min-height:44px;display:inline-flex;align-items:center;font-weight:600}
   @media (max-width:767px){
     .closing{display:flex;flex-direction:column;background:var(--navy)}
-    .closing::after{display:none}
     .closing-media{position:relative;inset:auto;order:2;aspect-ratio:4/3}
     .closing-inner{min-height:0}
   }
 </style>
-<style is:global>
-  @view-transition{navigation:auto}
-</style>
+

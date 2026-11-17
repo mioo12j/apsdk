@@ -29,6 +29,10 @@ const cur = (href: string) => (path === href || (href !== '/' && path.startsWith
       </button>
     </div>
   </div>
+  <div class="route-progress" aria-hidden="true" data-route-progress>
+    <span class="rp-line"></span>
+    <span class="rp-van"><svg viewBox="0 0 48 24" width="38" height="19"><path d="M2 5.5A2.5 2.5 0 0 1 4.5 3H29v15H2z" fill="#F6F4EE"/><path d="M29 7h8.5l6.5 6.2V18H29z" fill="#F6F4EE"/><path d="M31 9h6l4.2 4H31z" fill="#123C46"/><rect x="4" y="12.2" width="23" height="1.6" fill="#1A9FDD"/><rect x="4" y="14.2" width="23" height="1.2" fill="#9CCB3B"/><circle cx="10" cy="19" r="3.2" fill="#0B202C" stroke="#F6F4EE" stroke-width="1.4"/><circle cx="37" cy="19" r="3.2" fill="#0B202C" stroke="#F6F4EE" stroke-width="1.4"/></svg></span>
+  </div>
   <div class="m-menu" id="m-menu" data-menu>
     <nav aria-label="Menu">
       <a href="/track">Track a shipment <span aria-hidden="true">→</span></a>

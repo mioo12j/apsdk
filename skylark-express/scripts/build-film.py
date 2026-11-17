@@ -22,7 +22,7 @@ EDIT = [('01', 0.0, 4.0),                    # 00:00 Pickup
         ('10', 0.2, 3.0), ('POD', 0, 2.0),   # 00:33 Delivery + illustrated record
         ('12', 0.0, 4.0)]                    # 00:38 Close
 # overlay name, start, end (fades 0.35 s)
-TITLES = [('note', 0.4, 3.6), ('c1', 0.5, 3.7), ('c2', 4.3, 8.7), ('c3', 9.3, 14.7), ('mode', 15.2, 18.6),
+TITLES = [('c1', 0.5, 3.7), ('c2', 4.3, 8.7), ('c3', 9.3, 14.7), ('mode', 15.2, 18.6),
           ('road', 18.4, 20.8), ('rail', 21.3, 25.7), ('air', 26.3, 32.7), ('c4', 33.3, 35.8), ('end', 39.0, 42.1)]
 
 def build(tag, prefix, w, h):
@@ -107,6 +107,10 @@ hero = f'{W}/l_seg05.mp4'; herop = f'{W}/p_seg05.mp4'
 enc(hero, 'null', 23, '4500k', f'{OUT}/hero-dispatch-1080p.mp4', False)
 enc(hero, 'scale=1280:720:flags=lanczos', 25, '2200k', f'{OUT}/hero-dispatch-720p.mp4', False)
 enc(herop, 'crop=720:900:0:300', 25, '1800k', f'{OUT}/hero-dispatch-4x5.mp4', False)
+# inline reel (muted autoplay inside the page): lighter encodes of the same edit
+# (cut from the clean edit, without burned-in titles, because the page sets its own headline over it)
+enc(f'{W}/l_base.mp4', 'scale=1280:720:flags=lanczos', 30, '1400k', f'{OUT}/the-handover-reel-720p.mp4', False)
+enc(f'{W}/p_base.mp4', 'scale=540:960:flags=lanczos', 31, '1000k', f'{OUT}/the-handover-reel-540x960.mp4', False)
 # posters
 run(['ffmpeg', '-v', 'error', '-y', '-i', hero, '-frames:v', '1', '-q:v', '1', f'{ROOT}/src/assets/img/hero-poster.png'])
 run(['ffmpeg', '-v', 'error', '-y', '-sseof', '-0.1', '-i', hero, '-frames:v', '1', '-update', '1', '-q:v', '2', f'{ROOT}/src/assets/img/hero-settle.jpg'])

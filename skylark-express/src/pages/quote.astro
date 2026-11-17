@@ -4,18 +4,23 @@ import Human from '../components/Human.astro';
 import { services } from '../data/services';
 import { company } from '../data/company';
 import { integrations } from '../config/integrations';
+import { getImage } from 'astro:assets';
+const cutsAll = import.meta.glob('../assets/cut/*.png', { eager: true }) as Record<string, { default: ImageMetadata }>;
+const cutSrc = async (n: string) => (await getImage({ src: Object.entries(cutsAll).find(([k]) => k.endsWith(`/${n}.png`))![1].default, width: 560, format: 'webp', quality: 78 })).src;
+const cutFor: Record<string, string> = { 'road-logistics': 'truck', 'railway-logistics': 'train', 'air-logistics': 'uld', warehousing: 'forklift', 'project-cargo': 'lowloader', packaging: 'crate', integrated: 'pallet', 'not-sure': 'carton', '': 'carton' };
+const cutMap: Record<string, string> = {};
+for (const [k, n] of Object.entries(cutFor)) cutMap[k] = await cutSrc(n);
 const mode = integrations.forms.mode;
 const submitLabel = mode === 'offline' ? 'Open email draft' : 'Send quote request';
 ---
 <Base title="Get a Freight Quote: Road, Rail, Air and ODC" description="Request a freight quote from Skylark Express for road (FTL/PTL), rail, air, warehousing, project cargo or packaging. We aim to reply in one business day.">
   <section class="page-hero">
     <div class="wrap q-wrap">
-      <div class="stack" style="--s:14px">
+      <div class="stack q-head" style="--s:14px">
+        <div class="q-obj" aria-hidden="true"><img src={cutMap['']} alt="" width="560" height="420" data-q-cut data-cuts={JSON.stringify(cutMap)} decoding="async" /></div>
         <p class="eyebrow">Freight enquiry</p>
         <h1 class="display h-page">Get a freight quote</h1>
         <p class="lede">Three short steps. A request is an enquiry reviewed by our team, not a booking. {company.responseTarget}</p>
-        {mode === 'offline' && <p class="notice">This form prepares an email to <strong>{company.email}</strong> in your own mail app. Nothing is sent until you press send there.</p>}
-        {mode === 'test' && <p class="notice warn"><strong>Test environment.</strong> Requests go to a local test API. Nothing reaches Skylark Express.</p>}
       </div>
       <form class="q-form" data-quote data-mode={mode} novalidate action={`mailto:${company.email}`} method="post" enctype="text/plain">
         <ol class="q-steps" role="list" aria-label="Progress" data-q-progress>
@@ -69,6 +74,7 @@ const submitLabel = mode === 'offline' ? 'Open email draft' : 'Send quote reques
           <button class="btn btn-ghost" type="button" data-q-back hidden>Back</button>
           <button class="btn btn-ink" type="button" data-q-next hidden>Continue</button>
           <button class="btn btn-primary" type="submit" data-q-submit>{submitLabel}</button>
+          {mode === 'offline' && <p class="small muted q-fine">Opens an email to {company.email} in your mail app. It is sent when you press send there.</p>}
         </div>
         <div role="status" aria-live="polite" data-q-status></div>
       </form>
@@ -80,6 +86,30 @@ const submitLabel = mode === 'offline' ? 'Open email draft' : 'Send quote reques
 </Base>
 <style>
   .q-wrap{display:grid;gap:28px;max-width:860px}
+  .q-head{position:relative}
+  .q-head>*:not(.q-obj){animation:qUp .8s var(--ease) both}
+  .q-head>h1{animation-delay:.08s}.q-head>.lede{animation-delay:.16s}
+  .q-obj{display:none}
+  @media (min-width:1100px){
+    .q-wrap{max-width:none;grid-template-columns:minmax(0,860px) 1fr;align-items:start}
+    .q-head{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,860px) 1fr;column-gap:40px}
+    .q-head>*:not(.q-obj){grid-column:1}
+    .q-obj{display:block;grid-column:2;grid-row:1/span 4;align-self:center;justify-self:center;width:min(30vw,440px)}
+    .q-obj img{width:100%;height:auto;filter:drop-shadow(0 24px 26px rgba(16,37,50,.2));animation:qFloat 7s ease-in-out infinite}
+    .q-obj img.swap{animation:qSwap .7s cubic-bezier(.16,.84,.3,1) both}
+  }
+  @keyframes qUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  @keyframes qFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  @keyframes qSwap{from{opacity:0;transform:translateX(60px) rotate(-3deg)}to{opacity:1;transform:none}}
+  .q-form fieldset:not([hidden]){animation:qStep .45s var(--ease) both}
+  @keyframes qStep{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+  .q-steps{position:relative}
+  .q-steps li .mono{transition:background-color .3s,color .3s,border-color .3s}
+  .q-fine{margin:0}
+  :global(.q-tick){width:64px;height:64px}
+  :global(.q-tick circle){stroke-dasharray:1;stroke-dashoffset:1;animation:qDraw .7s var(--ease) forwards}
+  :global(.q-tick path){stroke-dasharray:1;stroke-dashoffset:1;animation:qDraw .45s var(--ease) .55s forwards}
+  @keyframes qDraw{to{stroke-dashoffset:0}}
   .q-form{display:grid;gap:22px;background:#fff;border:1.5px solid var(--ink);padding:clamp(16px,3vw,32px)}
   .q-form fieldset{border:0;padding:0;margin:0;display:grid;gap:18px;min-width:0}
   .q-form legend{padding:0;margin-bottom:6px}

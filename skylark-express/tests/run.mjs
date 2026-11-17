@@ -122,10 +122,14 @@ const PAGES = ['/', '/about', '/services', '/services/road-logistics', '/service
   ok('Mobile menu opens and moves focus inside', (await p.locator('[data-menu]').getAttribute('data-open')) === 'true' && (await p.evaluate(() => document.activeElement.closest('[data-menu]') !== null)));
   await p.keyboard.press('Escape'); ok('Escape closes the menu and returns focus', (await p.evaluate(() => document.activeElement.hasAttribute('data-menu-btn'))));
   const reqs = []; p.on('request', (r) => /the-handover/.test(r.url()) && reqs.push(r.url()));
-  ok('Phone starts with the poster: no film request before play', reqs.length === 0);
-  const pf = p.locator('[data-film-open]').first(); await pf.scrollIntoViewIfNeeded(); await pf.click(); await p.waitForTimeout(700);
-  ok('Play film opens the player and fetches only the portrait rendition', (await p.locator('[data-film]').evaluate((d) => d.open)) && reqs.filter((u) => u.endsWith('.mp4')).every((u) => /portrait/.test(u)) && reqs.some((u) => /portrait/.test(u)), reqs.map((u) => u.split('/').pop()).join(','));
-  ok('Film starts muted with captions track', await p.locator('[data-film-video]').evaluate((v) => v.muted && v.textTracks.length === 1)); reqs.length = reqs.length;
+  const full = () => reqs.filter((u) => /the-handover-(1080p|720p|portrait)/.test(u));
+  ok('Phone starts with the poster: no film request before the film section is reached', reqs.length === 0);
+  const reel = p.locator('[data-reel]').first(); await reel.scrollIntoViewIfNeeded(); await p.waitForTimeout(900);
+  ok('Inline film plays muted, only once on screen, using the phone rendition', (await p.locator('[data-reel-video]').first().evaluate((v) => v.muted)) && reqs.every((u) => !/the-handover-(1080p|720p\.mp4)/.test(u)), reqs.map((u) => u.split('/').pop()).join(','));
+  ok('Inline film has a pause control', (await p.locator('[data-reel-toggle]').first().count()) === 1);
+  await p.locator('[data-film-sound]').first().click(); await p.waitForTimeout(700);
+  ok('“Watch with sound” opens the player and fetches only the portrait rendition', (await p.locator('[data-film]').evaluate((d) => d.open)) && full().length > 0 && full().every((u) => /portrait/.test(u)), full().map((u) => u.split('/').pop()).join(','));
+  ok('Sound is on only because the visitor asked for it; captions track present', await p.locator('[data-film-video]').evaluate((v) => !v.muted && v.textTracks.length === 1));
   await p.keyboard.press('Escape'); await p.waitForTimeout(200);
   ok('Escape closes the film, returns focus and releases the decoder', (await p.evaluate(() => document.activeElement.hasAttribute('data-film-open'))) && (await p.locator('[data-film-video]').evaluate((v) => !v.getAttribute('src'))));
   await c.close();
@@ -155,7 +159,7 @@ const PAGES = ['/', '/about', '/services', '/services/road-logistics', '/service
     const info = await pg.evaluate(() => ({ h1: document.querySelectorAll('h1').length, noAlt: [...document.images].filter((i) => !i.hasAttribute('alt')).length, title: document.title, canon: document.querySelector('link[rel=canonical]')?.href, robots: document.querySelector('meta[name=robots]')?.content, links: [...document.querySelectorAll('a[href^="/"]')].map((a) => a.getAttribute('href').split('#')[0].split('?')[0]), small: [...document.querySelectorAll('main a.btn, main button:not([data-pin]), header a, header button')].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && (r.height < 43.5); }).length }));
     if (info.h1 !== 1) issues.push(`${u}: ${info.h1} h1`); if (info.noAlt) issues.push(`${u}: ${info.noAlt} img without alt`); if (!info.canon?.startsWith('https://www.skylarkexpressdelhi.com')) issues.push(`${u}: canonical ${info.canon}`); if (!/noindex/.test(info.robots || '')) issues.push(`${u}: preview not noindex`); if (info.small) issues.push(`${u}: ${info.small} controls under 44px tall`);
     info.links.forEach((l) => hrefs.add(l));
-    await pg.evaluate(() => document.querySelectorAll('[data-reveal]').forEach((e) => e.classList.add('in'))); await pg.addStyleTag({ content: '*{transition:none!important}' }); await pg.waitForTimeout(50);
+    await pg.evaluate(() => document.querySelectorAll('[data-reveal]').forEach((e) => e.classList.add('in'))); await pg.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important}' }); await pg.waitForTimeout(50);
     await pg.evaluate(axeSrc); const ax = await pg.evaluate(() => window.axe.run(document, { runOnly: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] }));
     ax.violations.forEach((v) => axeIssues.push(`${u}: ${v.id} (${v.nodes.length}) ${v.nodes[0].target.join(' ')}`));
   }

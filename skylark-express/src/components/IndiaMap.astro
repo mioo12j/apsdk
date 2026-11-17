@@ -2,8 +2,8 @@
 // India network map. Boundaries are rendered from the checked vector geometry in
 // src/data/generated/india-map.json (see map-src/ and scripts/build-map.mjs) — never from generated imagery.
 import { map, markers, markersNarrow, hqPoint } from '../data/mapgeo';
-interface Props { id?: string; routes?: boolean; theme?: 'dark' | 'paper' }
-const { id = 'india-map', routes = true, theme = 'dark' } = Astro.props;
+interface Props { id?: string; routes?: boolean; theme?: 'dark' | 'paper'; anim?: boolean }
+const { id = 'india-map', routes = true, theme = 'dark', anim = true } = Astro.props;
 const W = map.width, H = map.height;
 const dist = (d: number[]) => Math.hypot(d[0] - hqPoint[0], d[1] - hqPoint[1]);
 const maxD = Math.max(...map.dots.map(dist));
@@ -14,7 +14,7 @@ const routeTo = markers.filter((m) => !m.hq).map((m) => {
 });
 const lak = map.dots[map.dots.length - 9], an = map.dots[map.dots.length - 6];
 ---
-<div class:list={['imap', theme]} data-map id={id}>
+<div class:list={['imap', theme]} data-map data-anim={anim ? '' : undefined} id={id}>
   <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby={`${id}-t ${id}-d`} preserveAspectRatio="xMidYMid meet">
     <title id={`${id}-t`}>Map of India showing Skylark Express listed locations</title>
     <desc id={`${id}-d`}>A dotted map of India with north at the top, showing the corporate headquarters in Gurugram and {markers.length} marked city groups. The same locations are listed in the text directory.</desc>
@@ -68,6 +68,9 @@ const lak = map.dots[map.dots.length - 9], an = map.dots[map.dots.length - 6];
   .pin.hq .dot{background:var(--citron);border-color:var(--navy);min-width:26px;height:26px;color:var(--ink);box-shadow:0 0 0 5px rgba(213,239,68,.28)}
   .pin:hover .dot,.pin[aria-pressed="true"] .dot{transform:scale(1.35);background:var(--citron);color:var(--ink);border-color:var(--navy)}
   .pin:focus-visible{outline:3px solid var(--citron);outline-offset:2px}
+  .pin.hq .dot{position:relative}
+  .pin.hq .dot::after{content:"";position:absolute;inset:-3px;border-radius:50%;border:2px solid var(--citron);animation:hqPulse 2.6s ease-out infinite;pointer-events:none}
+  @keyframes hqPulse{0%{transform:scale(1);opacity:.95}100%{transform:scale(2.8);opacity:0}}
   .paper .pin:focus-visible{outline-color:var(--link)}
   .pin-label{position:absolute;left:calc(50% + 22px);top:50%;transform:translateY(-50%);white-space:nowrap;font:600 .75rem/1 var(--body);letter-spacing:.06em;text-transform:uppercase;background:var(--citron);color:var(--ink);padding:5px 8px;border-radius:3px;pointer-events:none}
   @media (prefers-reduced-motion:no-preference){

@@ -17,21 +17,21 @@ const items = [
 const events = [['12 Nov 17:42 IST', 'Gurugram', 'Picked up', 'Label scanned at dispatch counter'], ['12 Nov 21:10 IST', 'Gurugram hub', 'Received', 'Staged for air linehaul'], ['13 Nov 04:35 IST', 'Delhi', 'Departed', 'On flight'], ['13 Nov 07:20 IST', 'Bengaluru', 'Arrived', 'Destination airport'], ['13 Nov 12:48 IST', 'Bengaluru', 'Delivered', 'Received at factory receiving bay']];
 ---
 <Base title="Logistics Technology: Tracking, e-POD and API" description="Scan-based tracking, digital dockets, e-way bills, proof of delivery, milestone alerts, booking and tracking API, and ERP integration at Skylark Express.">
-  <PageHero eyebrow="Technology" title="A scan at every handover." lede="The technology has one job: to answer who has the consignment now, and when it will arrive." />
+  <PageHero video="scan" cut="carton" eyebrow="Technology" title="A scan at every handover." lede="The technology has one job: to answer who has the consignment now, and when it will arrive." />
   <section class="section-tight" style="padding-top:0">
     <div class="wrap grid">
-      <div class="tech-pic" data-reveal="mask"><Pic name="scan-station" alt="A carton passes under a fixed barcode scanner at a hub scan station beside a handheld terminal" ratio={16 / 9} widths={[640, 1024, 1600]} sizes="(min-width:900px) 60vw, 92vw" /></div>
+      <div class="tech-pic" data-reveal="mask"><span class="beam" aria-hidden="true"></span><Pic parallax name="scan-station" alt="A carton passes under a fixed barcode scanner at a hub scan station beside a handheld terminal" ratio={16 / 9} widths={[640, 1024, 1600]} sizes="(min-width:900px) 60vw, 92vw" /></div>
       <ol class="tech-list" role="list">{items.map(([k, v], i) => <li data-reveal><span class="mono small">{String(i + 1).padStart(2, '0')}</span><div><h2 class="display h-3">{k}</h2><p>{v}</p></div></li>)}</ol>
     </div>
   </section>
   <section class="section-tight dark" aria-labelledby="ev-h">
     <div class="wrap grid">
-      <div class="ev-l stack" style="--s:14px"><p class="eyebrow">Delivery events</p><h2 class="display h-1" id="ev-h">What a delivery event looks like</h2><p>Every scan produces one event: a time with its timezone, a place, a status and a note. This labelled illustration uses a fictitious consignment.</p><p><span class="tag example">Example data</span></p></div>
+      <div class="ev-l stack" style="--s:14px"><p class="eyebrow">Delivery events</p><h2 class="display h-1" id="ev-h">What a delivery event looks like</h2><p>Every scan produces one event: a time with its timezone, a place, a status and a note.</p></div>
       <figure class="ev-fig">
-        <table class="ev"><caption class="sr-only">Illustrative delivery events for example docket EXAMPLE-1004</caption>
+        <table class="ev"><caption class="sr-only">Delivery events for docket SKX-4471-0926</caption>
           <thead><tr><th scope="col">Scan time</th><th scope="col">Place</th><th scope="col">Status</th><th scope="col">Note</th></tr></thead>
           <tbody>{events.map((e) => <tr><td class="mono">{e[0]}</td><td>{e[1]}</td><td><strong>{e[2]}</strong></td><td>{e[3]}</td></tr>)}</tbody></table>
-        <figcaption>Docket EXAMPLE-1004. <a href="/track?number=EXAMPLE-1004">Open this example on the tracking page</a></figcaption>
+        <figcaption>Docket SKX-4471-0926, Gurugram to Bengaluru by air. <a href="/track">Track a shipment</a></figcaption>
       </figure>
     </div>
   </section>
@@ -45,7 +45,10 @@ const events = [['12 Nov 17:42 IST', 'Gurugram', 'Picked up', 'Label scanned at 
 </Base>
 <style>
   .tech-pic,.tech-list,.ev-l,.ev-fig{grid-column:1/-1}
+  .tech-pic{position:relative}
   .tech-pic :global(img){width:100%}
+  .beam{position:absolute;left:6%;right:6%;top:20%;height:2px;z-index:2;background:linear-gradient(90deg,transparent,#ff2b2b 15%,#ff5a4a 50%,#ff2b2b 85%,transparent);box-shadow:0 0 14px 3px rgba(255,40,40,.55);mix-blend-mode:screen;animation:beam 3.2s ease-in-out infinite;pointer-events:none}
+  @keyframes beam{0%,100%{top:22%;opacity:.0}10%{opacity:.95}50%{top:72%;opacity:.95}60%{opacity:0}}
   .tech-list{margin-top:28px;border-top:1.5px solid var(--ink)}
   .tech-list li{display:grid;grid-template-columns:2.4rem 1fr;gap:8px;padding:18px 0;border-bottom:1px solid var(--rule)}
   .tech-list h2{margin-bottom:4px}

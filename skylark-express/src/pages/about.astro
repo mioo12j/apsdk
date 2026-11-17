@@ -4,6 +4,7 @@ import PageHero from '../components/PageHero.astro';
 import Pic from '../components/Pic.astro';
 import Founders from '../components/Founders.astro';
 import FilmDialog from '../components/FilmDialog.astro';
+import Showreel from '../components/Showreel.astro';
 import CTA from '../components/CTA.astro';
 import { company, timeline, values, figures } from '../data/company';
 const practice = [
@@ -16,22 +17,22 @@ const practice = [
 ];
 ---
 <Base title="About Skylark Express: Logistics Since 1993, Gurugram" description="Founded in 1993 by brothers Rakesh and Naveen Yadav, Skylark Express (Delhi) Pvt. Ltd. is a pan-India logistics company run from Gurugram. Read our story.">
-  <PageHero eyebrow="About" title="Founder-led since the first consignment." lede="Skylark Express (Delhi) Pvt. Ltd. is an integrated, pan-India logistics business run from Gurugram. It began in 1993 with two brothers, no office and no fleet." />
+  <PageHero video="dock" cut="pallet" eyebrow="About" title="Founder-led since the first consignment." lede="Skylark Express (Delhi) Pvt. Ltd. is an integrated, pan-India logistics business run from Gurugram. It began in 1993 with two brothers, no office and no fleet." />
   <section class="section petrol about-lead" aria-labelledby="lead-h">
     <div class="wrap grid">
       <div class="al-copy stack" style="--s:18px">
         <p class="eyebrow" data-reveal>Leadership</p>
         <h2 class="display h-1" id="lead-h" data-reveal>Two brothers. Two clear responsibilities.</h2>
         <p class="lede" data-reveal>Rakesh Yadav and Naveen Yadav took the first bookings and made the first deliveries personally. They still lead the business together, with the work divided plainly between them.</p>
-        <p data-reveal><button class="play-film" type="button" data-film-open><span class="pf-ic" aria-hidden="true"><svg width="12" height="14" viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z" fill="currentColor"/></svg></span>Play film · 42 seconds</button></p>
       </div>
       <div class="al-pics"><Founders size="about" /></div>
     </div>
   </section>
+  <Showreel id="about-reel" />
   <section class="section" aria-labelledby="tl-h">
     <div class="wrap grid">
       <h2 class="display h-1 tl-h" id="tl-h">From 1993 to today</h2>
-      <ol class="tl" role="list">{timeline.map((t, i) => <li data-reveal style={`--d:${i * 80}ms`}><span class="display tl-era">{t.era}</span><div><h3 class="display h-3">{t.title}</h3><p>{t.body}</p></div></li>)}</ol>
+      <ol class="tl" role="list" data-progress>{timeline.map((t, i) => <li data-reveal style={`--d:${i * 80}ms`}><span class="display tl-era">{t.era}</span><div><h3 class="display h-3">{t.title}</h3><p>{t.body}</p></div></li>)}</ol>
     </div>
   </section>
   <section class="section-tight dark" aria-labelledby="mis-h">
@@ -43,7 +44,7 @@ const practice = [
   </section>
   <section class="section" aria-labelledby="pr-h">
     <div class="wrap grid">
-      <div class="pr-pic" data-reveal="mask"><Pic name="team" alt="A shift lead briefs dock staff in Skylark jackets on the warehouse floor in the morning" ratio={4 / 3} widths={[480, 800, 1200]} sizes="(min-width:900px) 46vw, 92vw" /></div>
+      <div class="pr-pic" data-reveal="mask"><Pic parallax name="team" alt="A shift lead briefs dock staff in Skylark jackets on the warehouse floor in the morning" ratio={4 / 3} widths={[480, 800, 1200]} sizes="(min-width:900px) 46vw, 92vw" /></div>
       <div class="pr-copy stack" style="--s:16px">
         <p class="eyebrow">What the story means for your shipment</p>
         <h2 class="display h-1" id="pr-h">An identified pickup. A documented handover.</h2>
@@ -61,7 +62,7 @@ const practice = [
   <section class="section-tight rule-top" aria-labelledby="sc-h">
     <div class="wrap">
       <h2 class="display h-2" id="sc-h">Company-reported scale</h2>
-      <dl class="scale">{[figures.warehouses, figures.warehouseArea, figures.pinCodes, figures.states].map((f) => <div><dd class="display h-1">{f.value} <span class="u">{f.unit}</span></dd><dt class="small muted">{f.label}</dt></div>)}</dl>
+      <dl class="scale">{[figures.warehouses, figures.warehouseArea, figures.pinCodes, figures.states].map((f) => <div><dd class="display h-1" data-count>{f.value} <span class="u">{f.unit}</span></dd><dt class="small muted">{f.label}</dt></div>)}</dl>
       <p class="small muted" style="margin-top:16px;max-width:60ch">{figures.note}</p>
     </div>
   </section>
@@ -71,7 +72,9 @@ const practice = [
 <style>
   .al-copy,.al-pics{grid-column:1/-1}.al-pics{margin-top:32px}
   .tl-h{grid-column:1/-1;margin-bottom:24px}
-  .tl{grid-column:1/-1;border-top:1.5px solid var(--ink)}
+  .tl{grid-column:1/-1;border-top:1.5px solid var(--ink);position:relative}
+  .tl::after{content:"";position:absolute;left:0;top:-1.5px;height:3px;width:100%;background:var(--citron);transform-origin:left;transform:scaleX(var(--p,0))}
+  .tl-era{transition:color .4s}
   .tl li{display:grid;gap:8px;padding:22px 0;border-bottom:1px solid var(--rule-strong)}
   .tl-era{font-size:clamp(2.5rem,2rem + 3vw,4.5rem);line-height:.9;color:var(--link)}
   .mis-l,.vals{grid-column:1/-1}

@@ -1,0 +1,43 @@
+---
+// "The handover" playing inline: muted, looping, only while on screen. "Watch with sound" opens the full player.
+import Pic from './Pic.astro';
+interface Props { id?: string }
+const { id = 'reel' } = Astro.props;
+---
+<section class="reel dark" aria-labelledby={`${id}-h`} data-reel>
+  <div class="reel-media">
+    <Pic name="film-poster" alt="Still from the Skylark Express film: a Skylark truck easing out of an amber-lit loading bay before sunrise" sizes="100vw" widths={[800, 1280, 1920]} quality={60} />
+    <video muted playsinline loop preload="none" disablepictureinpicture tabindex="-1" aria-label="The handover, the Skylark Express brand film, playing without sound" data-reel-video data-src-l="/media/the-handover-reel-720p.mp4" data-src-p="/media/the-handover-reel-540x960.mp4"></video>
+  </div>
+  <div class="reel-shade" aria-hidden="true"></div>
+  <div class="wrap reel-ui">
+    <div class="reel-copy">
+      <p class="eyebrow">The film</p>
+      <h2 class="display h-page" id={`${id}-h`}>The handover.</h2>
+      <p class="lede">One carton, from the dispatch counter to the factory floor, by road, rail and air.</p>
+    </div>
+    <div class="reel-ctl" role="group" aria-label="Film controls">
+      <button type="button" class="reel-round" data-reel-toggle aria-label="Play film"><span class="ic" aria-hidden="true"></span></button>
+      <button type="button" class="reel-sound" data-film-open data-film-sound><span class="ic-sound" aria-hidden="true"></span>Watch with sound</button>
+    </div>
+  </div>
+  <div class="reel-progress" aria-hidden="true"><span data-reel-bar></span></div>
+</section>
+<script>
+  import { motionOK, saveData } from '../scripts/motion';
+  document.querySelectorAll<HTMLElement>('[data-reel]').forEach((sec) => {
+    const v = sec.querySelector<HTMLVideoElement>('[data-reel-video]')!, btn = sec.querySelector<HTMLButtonElement>('[data-reel-toggle]')!, bar = sec.querySelector<HTMLElement>('[data-reel-bar]')!;
+    let userPaused = false, visible = false;
+    const src = () => (innerHeight > innerWidth && innerWidth < 820 ? v.dataset.srcP : v.dataset.srcL)!;
+    const sync = () => { const playing = !v.paused; sec.classList.toggle('is-playing', playing); btn.setAttribute('aria-label', playing ? 'Pause film' : 'Play film'); };
+    const play = () => { if (!v.getAttribute('src')) v.src = src(); v.play().catch(() => {}); };
+    btn.addEventListener('click', () => { if (v.paused) { userPaused = false; play(); } else { userPaused = true; v.pause(); } });
+    ['play', 'pause', 'playing'].forEach((e) => v.addEventListener(e, sync));
+    v.addEventListener('timeupdate', () => { if (v.duration) bar.style.transform = `scaleX(${(v.currentTime / v.duration).toFixed(4)})`; });
+    new IntersectionObserver((es) => { visible = es[0].isIntersecting; if (visible && !userPaused && motionOK() && !saveData) play(); else if (!visible) v.pause(); }, { threshold: 0.35 }).observe(sec);
+    document.addEventListener('motionchange', () => { if (!motionOK()) v.pause(); else if (visible && !userPaused) play(); });
+    // the full player takes over: pause the inline reel while it is open
+    document.querySelectorAll('[data-film]').forEach((d) => { d.addEventListener('close', () => { if (visible && !userPaused && motionOK()) play(); }); });
+    sec.querySelector('[data-film-open]')?.addEventListener('click', () => v.pause());
+  });
+</script>

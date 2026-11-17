@@ -13,6 +13,18 @@ const queryLink = document.querySelector<HTMLAnchorElement>('[data-query-link]')
 const fmt = new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' });
 const when = (iso: string) => `${fmt.format(new Date(iso))} IST`;
 const day = (iso: string) => new Intl.DateTimeFormat('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' }).format(new Date(iso + 'T12:00:00+05:30'));
+const STAGES = ['Pickup', 'Hub', 'Linehaul', 'Delivery'];
+const VAN = '<svg viewBox="0 0 48 24" width="44" height="22" aria-hidden="true"><path d="M2 5.5A2.5 2.5 0 0 1 4.5 3H29v15H2z" fill="#fff" stroke="#102532" stroke-width="1.4"/><path d="M29 7h8.5l6.5 6.2V18H29z" fill="#fff" stroke="#102532" stroke-width="1.4"/><path d="M31 9h6l4.2 4H31z" fill="#123C46"/><rect x="4" y="12.2" width="23" height="1.6" fill="#1A9FDD"/><rect x="4" y="14.2" width="23" height="1.2" fill="#9CCB3B"/><circle cx="10" cy="19" r="3.2" fill="#102532"/><circle cx="37" cy="19" r="3.2" fill="#102532"/></svg>';
+function stageOf(r: TrackResult) {
+  if (r.state === 'delivered') return { pct: 100, i: 3 };
+  if (r.state === 'exception') return { pct: 90, i: 3 };
+  if (r.state === 'collection-pending') return { pct: 3, i: 0 };
+  const m = r.events.map((e) => e.mode);
+  if (m.some((x) => x === 'Road' || x === 'Rail' || x === 'Air')) return { pct: 64, i: 2 };
+  if (m.includes('Hub')) return { pct: 36, i: 1 };
+  return { pct: 12, i: 0 };
+}
+const progress = (r: TrackResult) => { const st = stageOf(r); return `<div class="trk-prog ${r.state}" role="img" aria-label="Progress: ${STAGES[st.i]}" style="--to:${st.pct}%"><div class="tp-rail"><span class="tp-fill"></span><span class="tp-van">${VAN}</span></div><ol class="tp-stops">${STAGES.map((x, k) => `<li class="${k <= st.i ? 'done' : ''}${k === st.i ? ' now' : ''}">${x}</li>`).join('')}</ol></div>`; };
 const queryHref = (n: string) => `/contact?topic=shipment&docket=${encodeURIComponent(n)}`;
 
 type Lookup = { kind: 'found'; r: TrackResult; example: boolean } | { kind: 'unknown'; number: string } | { kind: 'unavailable'; number: string };
@@ -37,10 +49,11 @@ function card(l: Lookup): string {
     : `<div class="trk-pod"><h3 class="display h-3">Proof of delivery (POD)</h3><p>The delivery is recorded, but the POD document is not available online yet.</p><p><a class="link-arrow" href="${queryHref(r.number)}&need=pod">Ask for the POD <span aria-hidden="true">→</span></a></p></div>`;
   return `<article class="trk-card" data-state="${r.state}" aria-label="Shipment ${esc(r.number)}">
     <h2><span class="mono" style="font-size:1.25rem">${esc(r.number)}</span><span class="st ${r.state}">${esc(r.statusLabel)}</span>${l.example ? '<span class="tag example">Example data</span>' : ''}</h2>
+    ${progress(r)}
     ${r.exceptionNote ? `<div class="notice bad"><p class="notice-h">${esc(r.exceptionNote)}</p>${humanHTML('To arrange delivery:')}</div>` : ''}
     <dl class="trk-latest"><div><dt>Latest scan</dt><dd>${esc(latest.text)}</dd></div><div><dt>City</dt><dd>${esc(latest.city)}</dd></div><div><dt>Mode</dt><dd>${esc(latest.mode)}</dd></div><div><dt>Scan time</dt><dd><time datetime="${latest.time}">${when(latest.time)}</time></dd></div>
       <div><dt>Route</dt><dd>${esc(r.origin)} → ${esc(r.destination)}</dd></div><div><dt>Service</dt><dd>${esc(r.service)}</dd></div><div><dt>Pieces</dt><dd>${r.pieces}</dd></div>${eta}</dl>
-    <div><h3 class="display h-3" style="margin-bottom:12px">Scan history</h3><ol class="tl" role="list">${r.events.map((e) => `<li><strong>${esc(e.text)}</strong><time datetime="${e.time}">${when(e.time)} · ${esc(e.city)} · ${esc(e.mode)}</time></li>`).join('')}</ol></div>
+    <div><h3 class="display h-3" style="margin-bottom:12px">Scan history</h3><ol class="tl trk-tl" role="list">${r.events.map((e, k) => `<li style="--k:${k}"><strong>${esc(e.text)}</strong><time datetime="${e.time}">${when(e.time)} · ${esc(e.city)} · ${esc(e.mode)}</time></li>`).join('')}</ol></div>
     ${pod}
     <p><a class="link-arrow" href="${queryHref(r.number)}">Raise a shipment query <span aria-hidden="true">→</span></a></p>
   </article>`;
@@ -58,6 +71,7 @@ async function run(raw: string, push = true) {
   status.textContent = 'Checking…';
   const results = await Promise.all(v.numbers.map(lookup));
   out.innerHTML = results.map(card).join('');
+  requestAnimationFrame(() => requestAnimationFrame(() => out.querySelectorAll('.trk-prog').forEach((p) => p.classList.add('go'))));
   const sum = results.map((l) => l.kind === 'found' ? `${l.r.number}: ${l.r.statusLabel}` : l.kind === 'unknown' ? `${l.number}: not found` : `${l.number}: tracking unavailable`).join('. ');
   status.innerHTML = `<span class="sr-only">${esc(sum)}</span>`;
   out.querySelectorAll<HTMLButtonElement>('[data-retry]').forEach((b) => b.addEventListener('click', () => run(input.value)));

@@ -2,8 +2,8 @@
 // Responsive picture: AVIF + WebP + JPEG fallback, explicit dimensions, lazy by default.
 import { getImage } from 'astro:assets';
 const all = import.meta.glob('../assets/img/*.{jpg,png}', { eager: true }) as Record<string, { default: ImageMetadata }>;
-interface Props { name: string; alt: string; sizes?: string; widths?: number[]; ratio?: number; priority?: boolean; class?: string; position?: string; quality?: number }
-const { name, alt, sizes = '100vw', widths = [480, 800, 1200, 1600, 2200], ratio, priority = false, class: cls, position, quality = 62 } = Astro.props;
+interface Props { name: string; alt: string; sizes?: string; widths?: number[]; ratio?: number; priority?: boolean; class?: string; position?: string; quality?: number; parallax?: boolean | number }
+const { name, alt, sizes = '100vw', widths = [480, 800, 1200, 1600, 2200], ratio, priority = false, class: cls, position, quality = 62, parallax } = Astro.props;
 const key = Object.keys(all).find((k) => k.endsWith(`/${name}.jpg`) || k.endsWith(`/${name}.png`));
 if (!key) throw new Error(`Pic: image "${name}" not found`);
 const src = all[key].default;
@@ -20,5 +20,5 @@ const fb = await getImage({ src, width: fbW, height: hFor(fbW), format: 'jpeg', 
 <picture>
   <source type="image/avif" srcset={avif} sizes={sizes} />
   <source type="image/webp" srcset={webp} sizes={sizes} />
-  <img src={fb.src} width={fbW} height={hFor(fbW)} alt={alt} class={cls} loading={priority ? 'eager' : 'lazy'} decoding={priority ? 'sync' : 'async'} fetchpriority={priority ? 'high' : undefined} style={position ? `object-position:${position}` : undefined} />
+  <img src={fb.src} width={fbW} height={hFor(fbW)} alt={alt} class:list={[cls, { px: !!parallax }]} data-parallax={parallax ? String(parallax === true ? 9 : parallax) : undefined} loading={priority ? 'eager' : 'lazy'} decoding={priority ? 'sync' : 'async'} fetchpriority={priority ? 'high' : undefined} style={position ? `object-position:${position}` : undefined} />
 </picture>

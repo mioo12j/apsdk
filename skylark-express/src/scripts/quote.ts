@@ -56,6 +56,13 @@ function validate(s: number, focus = true) {
   else summary.hidden = true;
   return !errs.length;
 }
+// the selected service's object slides in beside the heading
+const cutImg = document.querySelector<HTMLImageElement>('[data-q-cut]');
+const cuts = cutImg ? (JSON.parse(cutImg.dataset.cuts || '{}') as Record<string, string>) : {};
+function showCut() {
+  if (!cutImg) return; const src = cuts[el('service').value] || cuts['']; if (!src || cutImg.getAttribute('src') === src) return;
+  cutImg.classList.remove('swap'); cutImg.src = src; void cutImg.offsetWidth; cutImg.classList.add('swap');
+}
 function conditional() { const sv = el('service').value || 'not-sure'; form.querySelectorAll<HTMLElement>('[data-for]').forEach((b) => (b.hidden = !b.dataset.for!.split(' ').includes(sv))); }
 function show(s: number, focus = true) {
   step = s; steps.forEach((f, i) => (f.hidden = i !== s));
@@ -66,7 +73,7 @@ function show(s: number, focus = true) {
 }
 next.addEventListener('click', () => { if (validate(step)) show(step + 1); });
 back.addEventListener('click', () => { summary.hidden = true; show(step - 1); });
-el('service').addEventListener('change', conditional);
+el('service').addEventListener('change', () => { conditional(); showCut(); });
 // errors update while typing (not on blur: a blur-time layout shift can swallow the click on Continue)
 form.addEventListener('input', (e) => { const t = e.target as HTMLInputElement; if (t.getAttribute?.('aria-invalid') === 'true') { const errs = rules[step](); setErr(t.name, errs.find(([n]) => n === t.name)?.[1] || ''); } });
 form.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.target as HTMLElement).tagName === 'INPUT' && step < 2) { e.preventDefault(); next.click(); } });
@@ -96,7 +103,7 @@ form.addEventListener('submit', async (e) => {
   try { sessionStorage.removeItem(KEY); } catch {}
   token = crypto.randomUUID?.() || String(Date.now());
   form.hidden = true; done.hidden = false;
-  done.innerHTML = `<h2 class="display h-2">Request received</h2>${test ? '<p class="notice warn"><strong>Test environment.</strong> This reference came from the local test API. No enquiry was sent to Skylark Express.</p>' : ''}<p>Your enquiry has been accepted by our system and passed to the sales team for review. It is not a booking. We aim to reply within one business day.</p><p>Reference: <strong class="mono" data-q-ref>${esc(ref)}</strong></p><pre data-q-text>${esc(txt)}</pre><p class="cluster"><button class="btn btn-ink" type="button" data-copy>Copy summary</button><a class="btn btn-ghost" href="/">Back to home</a></p><p role="status" aria-live="polite" data-copy-status></p>${humanHTML('Need to add something?')}`;
+  done.innerHTML = `<svg class="q-tick" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="none" stroke="#1C6B3F" stroke-width="3" pathLength="1"/><path d="M19 33l9 9 17-19" fill="none" stroke="#1C6B3F" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" pathLength="1"/></svg><h2 class="display h-2">Request received</h2>${test ? '<p class="notice warn"><strong>Test environment.</strong> This reference came from the local test API. No enquiry was sent to Skylark Express.</p>' : ''}<p>Your enquiry has been accepted by our system and passed to the sales team for review. It is not a booking. We aim to reply within one business day.</p><p>Reference: <strong class="mono" data-q-ref>${esc(ref)}</strong></p><pre data-q-text>${esc(txt)}</pre><p class="cluster"><button class="btn btn-ink" type="button" data-copy>Copy summary</button><a class="btn btn-ghost" href="/">Back to home</a></p><p role="status" aria-live="polite" data-copy-status></p>${humanHTML('Need to add something?')}`;
   done.focus(); wireDone(txt);
 });
 function wireDone(txt: string) {
@@ -105,3 +112,4 @@ function wireDone(txt: string) {
 }
 form.removeAttribute('action'); // JS handles submission; the mailto action is the no-JS fallback
 show(0, false);
+showCut();

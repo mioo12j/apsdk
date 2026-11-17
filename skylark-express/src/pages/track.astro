@@ -28,11 +28,6 @@ const mode = integrations.tracking.mode;
         <Human lead="Contact our team with your docket number:" />
         <p class="cluster"><a class="link-arrow" href="/contact?topic=shipment" data-query-link>Raise a shipment query <span aria-hidden="true">→</span></a><a class="link-arrow" href="/help#tracking">Tracking help <span aria-hidden="true">→</span></a><a class="link-arrow" href="/technology">How tracking works <span aria-hidden="true">→</span></a></p>
       </section>
-      <section class="trk-ex" aria-labelledby="trk-ex-h">
-        <h2 class="display h-3" id="trk-ex-h">See an example <span class="tag example">Example data</span></h2>
-        <p class="small muted">These fictitious numbers show what each status looks like. They are not real shipments.{mode === 'offline' && ' Live tracking is not connected in this build, so only these examples return a result.'}</p>
-        <p class="cluster">{exampleShipments.map((s) => <a class="mono ex-a" href={`/track?number=${s.number}`}>{s.number}<span class="sr-only">, example: {s.statusLabel}</span></a>)}</p>
-      </section>
     </div>
   </section>
   <script>import '../scripts/track.ts';</script>
@@ -58,11 +53,27 @@ const mode = integrations.tracking.mode;
   .tl{display:grid;gap:0;border-left:2px solid var(--rule-strong);margin-left:6px}
   .tl li{position:relative;padding:0 0 16px 20px}
   .tl li::before{content:"";position:absolute;left:-7px;top:6px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid var(--ink)}
-  .tl li:first-child::before{background:var(--citron)}
+  .tl li:first-child::before{background:var(--citron);box-shadow:0 0 0 0 rgba(213,239,68,.7);animation:tlPulse 2s infinite}
+  @keyframes tlPulse{0%{box-shadow:0 0 0 0 rgba(213,239,68,.7)}70%{box-shadow:0 0 0 8px rgba(213,239,68,0)}100%{box-shadow:0 0 0 0 rgba(213,239,68,0)}}
   .tl time{display:block;font-size:.8125rem;color:var(--muted)}
   .trk-pod{display:grid;gap:10px;border-top:1px solid var(--rule);padding-top:14px}
   .trk-pod form{display:grid;gap:10px;max-width:460px}
   .trk-loading{display:flex;gap:12px;align-items:center;font-weight:600}
+  .trk-card{animation:trkIn .5s var(--ease) both}
+  @keyframes trkIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .trk-prog{padding:6px 0 2px}
+  .tp-rail{position:relative;height:6px;border-radius:3px;background:var(--paper-2);margin:26px 22px 10px}
+  .tp-fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:3px;background:var(--link);transition:width 1.6s cubic-bezier(.3,.7,.2,1) .15s}
+  .tp-van{position:absolute;bottom:4px;left:0;transform:translateX(-50%);line-height:0;transition:left 1.6s cubic-bezier(.3,.7,.2,1) .15s}
+  .trk-prog.go .tp-fill{width:var(--to)}
+  .trk-prog.go .tp-van{left:var(--to)}
+  .trk-prog.delivered .tp-fill{background:var(--ok)}
+  .trk-prog.exception .tp-fill{background:var(--danger)}
+  .tp-stops{display:grid;grid-template-columns:repeat(4,1fr);margin:0;padding:0;list-style:none;font:600 .75rem/1.2 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .tp-stops li{text-align:center}.tp-stops li:first-child{text-align:left}.tp-stops li:last-child{text-align:right}
+  .tp-stops li.done{color:var(--ink)}
+  .tp-stops li.now{color:var(--link)}
+  .trk-tl li{animation:trkIn .45s var(--ease) both;animation-delay:calc(.25s + var(--k,0) * 70ms)}
   .spin{width:20px;height:20px;border:3px solid var(--rule);border-top-color:var(--ink);border-radius:50%;animation:spin .8s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
 </style>

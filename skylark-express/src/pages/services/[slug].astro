@@ -3,6 +3,8 @@ import Base from '../../layouts/Base.astro';
 import Pic from '../../components/Pic.astro';
 import Diagram from '../../components/Diagram.astro';
 import Cut from '../../components/Cut.astro';
+import LoopVideo from '../../components/LoopVideo.astro';
+const loopFor: Record<string, string> = { 'road-logistics': 'road', 'railway-logistics': 'rail', 'air-logistics': 'air', warehousing: 'hub', 'project-cargo': 'project', packaging: 'scan' };
 const cutFor: Record<string, string> = { 'road-logistics': 'truck', 'railway-logistics': 'train', 'air-logistics': 'uld', warehousing: 'forklift', 'project-cargo': 'lowloader', packaging: 'crate' };
 import { services } from '../../data/services';
 import { ORIGIN } from '../../data/site';
@@ -17,7 +19,7 @@ const jsonld = [{ '@context': 'https://schema.org', '@type': 'Service', name: s.
 ---
 <Base title={s.seoTitle ?? s.name} description={(s.summary + ' Plan it with Skylark Express, pan-India from Gurugram.').slice(0, 160)} jsonld={jsonld} ogImage={og.src} ogAlt={s.imageAlt} crumbs={[{ name: 'Services', href: '/services' }, { name: s.name, href: `/services/${s.slug}` }]}>
   <section class="sd-hero dark" data-sd-hero>
-    <div class="sd-pic"><Pic name={s.image} alt={s.imageAlt} priority sizes="100vw" widths={[640, 1024, 1600, 2200]} /></div>
+    <div class="sd-pic"><LoopVideo name={loopFor[s.slug]} alt={s.imageAlt} class="bg" priority label={`${s.name} video`} /></div>
     <span class="sd-word" aria-hidden="true" data-text={s.short}></span>
     <div class="sd-obj" aria-hidden="true" data-sd-obj><span class="sd-shadow"></span><Cut name={cutFor[s.slug]} priority sizes="(min-width:900px) 50vw, 90vw" widths={[500, 900, 1400]} /></div>
     <div class="wrap sd-hero-in">
@@ -87,8 +89,19 @@ const jsonld = [{ '@context': 'https://schema.org', '@type': 'Service', name: s.
 <style>
   .sd-hero{position:relative;isolation:isolate;min-height:min(78vh,760px);display:grid;align-items:end;overflow:clip;background:var(--navy)}
   .sd-pic{position:absolute;inset:0;z-index:-2}
-  .sd-pic :global(img){width:100%;height:100%;object-fit:cover;view-transition-name:service-hero;opacity:.42;filter:saturate(.8)}
-  .sd-hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(11,32,44,.98) 0%,rgba(11,32,44,.55) 50%,rgba(11,32,44,.75) 100%)}
+  .sd-pic{overflow:hidden}
+  .sd-pic :global(img),.sd-pic :global(video){opacity:.5;filter:saturate(.85)}
+  .sd-pic :global(.loopv-btn){z-index:5}
+  .sd-pic :global(picture img){view-transition-name:service-hero}
+  .sd-obj :global(img){view-transition-name:service-obj}
+  .sd-obj :global(picture){animation:sdIn 1.5s cubic-bezier(.16,.84,.3,1) .2s both}
+  :global(.vt-in) .sd-obj :global(picture){animation:none}
+  .sd-hero-in>*{animation:sdUp .9s var(--ease) both}
+  .sd-hero-in>h1{animation-delay:.12s}.sd-hero-in>p{animation-delay:.06s}
+  @keyframes sdIn{from{opacity:0;transform:translate(14vw,2vh) rotate(-3deg)}to{opacity:1;transform:none}}
+  @keyframes sdUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+  .sd-pic :global(.loopv-shade){background:linear-gradient(0deg,rgba(11,32,44,.98) 0%,rgba(11,32,44,.55) 50%,rgba(11,32,44,.75) 100%)}
+  .sd-hero-in{pointer-events:none}.sd-hero-in>*{pointer-events:auto}
   .sd-word::before{content:attr(data-text)}
   .sd-word{position:absolute;right:-2vw;top:8%;font:700 min(28vw,40vh)/.8 var(--display);text-transform:uppercase;color:transparent;-webkit-text-stroke:1.5px rgba(246,244,238,.16);white-space:nowrap;pointer-events:none}
   .sd-obj{position:absolute;right:4vw;bottom:14%;width:min(52vw,640px);z-index:1;will-change:transform}

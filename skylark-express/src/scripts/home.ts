@@ -23,7 +23,6 @@ const jv = document.querySelector<HTMLVideoElement>('[data-journey-video]');
 const steps = Array.from(document.querySelectorAll<HTMLElement>('[data-step]'));
 const frames = Array.from(document.querySelectorAll<HTMLElement>('[data-frame]'));
 const fill = document.querySelector<HTMLElement>('[data-journey-fill]');
-const par = Array.from(document.querySelectorAll<HTMLElement>('[data-parallax]'));
 const clamp = (n: number, a = 0, b = 1) => Math.min(b, Math.max(a, n));
 // 03 · cinematic journey: scrolling plays the footage. Enabled unless the visitor asks for less motion or data.
 const DUR = scrub.duration, CH = scrub.chapters;
@@ -46,7 +45,7 @@ function jLoop() { // ease the playhead towards the scroll position so the foota
   jRaf = 0; if (!jActive) return;
   const d = jTarget - jCur;
   if (Math.abs(d) > 0.004) {
-    jCur += d * 0.16;
+    jCur += d * 0.24;
     if (jReady && jv && !jSeeking && Math.abs(jv.currentTime - jCur) > 0.035) { jSeeking = true; jv.currentTime = jCur; }
   }
   jRaf = requestAnimationFrame(jLoop);
@@ -87,22 +86,24 @@ function cartonTick(vh: number) {
   T(carton, `translate3d(0,${((0.5 - p) * 120).toFixed(1)}px,0) rotate(${((p - 0.5) * 22).toFixed(2)}deg)`);
 }
 // 02b · mode theatre: vertical scroll drives a horizontal run; vehicles move faster than their words
+let mLastY = scrollY, mVel = 0;
 function modesTick(vh: number) {
   if (!modes) return;
   const r = modes.getBoundingClientRect(), vw = innerWidth;
   if (modes.classList.contains('is-pin') && mTrack) {
     const p = clamp(-r.top / (r.height - (vh - 72))), x = p * 3; // 0..3 panels
     T(mTrack, `translate3d(${(-x * vw).toFixed(1)}px,0,0)`);
-    T(mLane, `translate3d(${(-x * vw * 0.25).toFixed(1)}px,0,0)`);
+    T(mLane, `translate3d(${(-x * vw).toFixed(1)}px,0,0)`);
+    const v = Math.abs(scrollY - mLastY); mLastY = scrollY; mVel = mVel * 0.82 + Math.min(1, v / 40) * 0.18; modes.style.setProperty('--vel', mVel.toFixed(3));
     mPanels.forEach((pn, i) => {
       const d = x - i; // -1 → entering from right, 0 → centred, 1 → leaving left
-      T(pn.querySelector<HTMLElement>('[data-obj]'), `translate3d(${(-d * vw * 0.38).toFixed(1)}px,${(i === 3 ? -Math.max(0, d) * 22 : 0).toFixed(1)}vh,0) rotate(${(i === 3 ? -4 - Math.max(0, d) * 10 : 0).toFixed(2)}deg)`);
-      T(pn.querySelector<HTMLElement>('[data-word]'), `translate3d(${(d * vw * 0.22).toFixed(1)}px,0,0)`);
+      T(pn.querySelector<HTMLElement>('[data-obj]'), `translate3d(${(d * vw * 0.38).toFixed(1)}px,${(i === 3 ? -Math.max(0, d) * 22 : 0).toFixed(1)}vh,0) rotate(${(i === 3 ? -4 - Math.max(0, d) * 10 : 0).toFixed(2)}deg)`);
+      T(pn.querySelector<HTMLElement>('[data-word]'), `translate3d(${(d * vw * 0.3).toFixed(1)}px,0,0)`);
       const c = pn.querySelector<HTMLElement>('.m-copy'); if (c) { c.style.opacity = String(clamp(1 - Math.abs(d) * 1.6)); c.style.transform = `translate3d(${(-d * 60).toFixed(1)}px,0,0)`; }
     });
     const on = Math.round(x); mDots.forEach((d, i) => d.classList.toggle('on', i === on));
   } else {
-    mPanels.forEach((pn) => { const q = pn.getBoundingClientRect(); const d = clamp((vh - q.top) / (vh + q.height)) - 0.5; T(pn.querySelector<HTMLElement>('[data-obj]'), `translate3d(${(-d * vw * 0.5).toFixed(1)}px,0,0)`); T(pn.querySelector<HTMLElement>('[data-word]'), `translate3d(${(d * vw * 0.2).toFixed(1)}px,0,0)`); });
+    mPanels.forEach((pn) => { const q = pn.getBoundingClientRect(); const d = clamp((vh - q.top) / (vh + q.height)) - 0.5; T(pn.querySelector<HTMLElement>('[data-obj]'), `translate3d(${(d * vw * 0.5).toFixed(1)}px,0,0)`); T(pn.querySelector<HTMLElement>('[data-word]'), `translate3d(${(d * vw * 0.2).toFixed(1)}px,0,0)`); });
   }
 }
 
@@ -110,7 +111,6 @@ function tick() {
   const vh = innerHeight;
   if (!reduce) { skyTick(vh); cartonTick(vh); modesTick(vh); }
   if (!reduce) for (const s of routes) { const r = s.getBoundingClientRect(); s.style.setProperty('--p', clamp((vh * 0.62 - r.top) / r.height).toFixed(4)); }
-  if (!reduce) for (const el of par) { const r = el.parentElement!.getBoundingClientRect(); const p = clamp((vh - r.top) / (vh + r.height)); el.style.transform = `translate3d(0,${((p - 0.5) * 10).toFixed(2)}%,0)`; }
   journeyTick(vh);
 }
 let raf = 0;
@@ -122,18 +122,6 @@ const endSec = document.querySelector<HTMLElement>('[data-route="end"]'), podLin
 const setEnd = () => { if (endSec && podLink) endSec.style.setProperty('--route-end', (podLink.getBoundingClientRect().bottom - endSec.getBoundingClientRect().top - 3) + 'px'); };
 setEnd(); addEventListener('resize', setEnd); addEventListener('load', setEnd);
 
-// 02 · figures count up to the values already present in the HTML
-if (!reduce && 'IntersectionObserver' in window) {
-  const io = new IntersectionObserver((es) => es.forEach((e) => {
-    if (!e.isIntersecting) return; io.unobserve(e.target);
-    const node = e.target.firstChild as Text; const final = node?.textContent || ''; const m = final.match(/^(\D*)([\d,]+)(.*)$/);
-    if (!m || +m[2].replace(/,/g, '') === 1993) return;
-    const target = +m[2].replace(/,/g, ''), t0 = performance.now(), dur = 900;
-    const step = (now: number) => { const k = clamp((now - t0) / dur); const v = Math.round(target * (1 - Math.pow(1 - k, 3))); node.textContent = m[1] + v.toLocaleString('en-IN') + m[3]; if (k < 1) requestAnimationFrame(step); else node.textContent = final; };
-    requestAnimationFrame(step);
-  }), { threshold: 0.6 });
-  document.querySelectorAll('[data-count]').forEach((el) => io.observe(el));
-}
 
 // Back/forward: pinned sections change the page height during load, so restore the exact place ourselves.
 try {
@@ -143,3 +131,9 @@ try {
   const saved = sessionStorage.getItem('skylark.home.y');
   if (nav?.type === 'back_forward' && saved) { const y = +saved; const go = () => scrollTo(0, y); go(); requestAnimationFrame(go); addEventListener('load', go, { once: true }); }
 } catch {}
+
+// a clicked service card's object flies into the service page header (where view transitions are supported)
+document.querySelectorAll<HTMLAnchorElement>('.lift').forEach((a) => a.addEventListener('click', () => {
+  const img = a.querySelector<HTMLElement>('.lift-obj img'); if (img) img.style.viewTransitionName = 'service-obj';
+}));
+addEventListener('pageshow', () => document.querySelectorAll<HTMLElement>('.lift-obj img').forEach((i) => (i.style.viewTransitionName = '')));

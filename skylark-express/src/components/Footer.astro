@@ -4,6 +4,8 @@ import { company } from '../data/company';
 import { footerNav } from '../data/site';
 ---
 <footer class="site-footer dark">
+  <div class="foot-marquee" aria-hidden="true" data-marquee="0.45"><div class="mq-track">{[0, 1, 2, 3, 4, 5].map((i) => <span class:list={['mq-word', { solid: i % 2 === 1 }]} data-text={company.brandLine}></span>)}</div></div>
+  <div class="foot-road" aria-hidden="true" data-drive><span class="fr-lane"></span><span class="fr-van"><svg viewBox="0 0 48 24" width="64" height="32"><path d="M2 5.5A2.5 2.5 0 0 1 4.5 3H29v15H2z" fill="#F6F4EE"/><path d="M29 7h8.5l6.5 6.2V18H29z" fill="#F6F4EE"/><path d="M31 9h6l4.2 4H31z" fill="#123C46"/><rect x="4" y="12.2" width="23" height="1.6" fill="#1A9FDD"/><rect x="4" y="14.2" width="23" height="1.2" fill="#9CCB3B"/><circle cx="10" cy="19" r="3.2" fill="#0B202C" stroke="#F6F4EE" stroke-width="1.4"/><circle cx="37" cy="19" r="3.2" fill="#0B202C" stroke="#F6F4EE" stroke-width="1.4"/></svg></span></div>
   <div class="wrap">
     <div class="foot-grid">
       <div class="foot-brand stack" style="--s:16px">
@@ -13,7 +15,8 @@ import { footerNav } from '../data/site';
         <p class="small">
           {company.phones.map((p, i) => <><a href={`tel:${p.tel}`}>{p.display}</a>{i === 0 && <span aria-hidden="true"> · </span>}</>)}<br />
           <a href={`mailto:${company.email}`}>{company.email}</a><br />
-          <span class="muted">{company.hours.display}</span>
+          <span class="muted">{company.hours.display}</span><br />
+          <span class="open-status" data-open-status></span>
         </p>
       </div>
       {Object.entries(footerNav).map(([h, links]) => (
@@ -25,7 +28,7 @@ import { footerNav } from '../data/site';
     </div>
     <div class="foot-legal">
       <span>© {new Date().getFullYear()} {company.legalName}</span>
-      <span class="cluster"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/network#map-credits">Map credits</a></span>
+      <span class="cluster"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/network#map-credits">Map credits</a><button type="button" class="motion-toggle" data-motion-toggle aria-pressed="false"><span class="mt-ic" aria-hidden="true"></span><span data-motion-label>Pause animations</span></button></span>
     </div>
   </div>
 </footer>

@@ -6,13 +6,12 @@ import CTA from '../components/CTA.astro';
 import { industries } from '../data/industries';
 ---
 <Base title="Industries We Serve: Pharma, FMCG, Chemicals" description="Logistics for healthcare and pharma, IT and electronics, FMCG and retail, chemicals, automation and energy, with documented handovers across India.">
-  <PageHero eyebrow="Industries" title="Every sector asks a different question at the handover." lede="Six sectors, the cargo concerns that come with each, and the services that answer them.">
-    <nav aria-label="Sectors on this page"><ul class="ind-nav" role="list">{industries.map((i) => <li><a href={`#${i.id}`}>{i.name}</a></li>)}</ul></nav>
-  </PageHero>
+  <PageHero video="delivery" cut="crate" eyebrow="Industries" title="Every sector asks a different question at the handover." lede="Six sectors, the cargo concerns that come with each, and the services that answer them." />
+  <nav class="ind-bar" aria-label="Sectors on this page" data-spy><ul class="ind-nav wrap" role="list">{industries.map((i) => <li><a href={`#${i.id}`}>{i.name}</a></li>)}</ul></nav>
   {industries.map((ind, n) => (
     <section class:list={['section-tight rule-top ind', { flip: n % 2 === 1, big: !!ind.expanded }]} id={ind.id} aria-labelledby={`${ind.id}-h`}>
       <div class="wrap grid">
-        <div class="ind-pic" data-reveal="mask"><Pic name={ind.image} alt={ind.imageAlt} ratio={ind.expanded ? 16 / 10 : 3 / 2} widths={[480, 800, 1200]} sizes="(min-width:900px) 46vw, 92vw" /></div>
+        <div class="ind-pic" data-reveal="mask"><Pic parallax name={ind.image} alt={ind.imageAlt} ratio={ind.expanded ? 16 / 10 : 3 / 2} widths={[480, 800, 1200]} sizes="(min-width:900px) 46vw, 92vw" /></div>
         <div class="ind-copy stack" style="--s:16px">
           <p class="mono small muted">{String(n + 1).padStart(2, '0')} / 06</p>
           <h2 class="display h-1" id={`${ind.id}-h`}>{ind.name}</h2>
@@ -35,9 +34,23 @@ import { industries } from '../data/industries';
     </section>
   ))}
   <CTA />
+  <script>
+    // highlight the sector being read; keep its pill in view on narrow screens
+    const bar = document.querySelector<HTMLElement>('[data-spy]');
+    if (bar && 'IntersectionObserver' in window) {
+      const links = Array.from(bar.querySelectorAll<HTMLAnchorElement>('a'));
+      const io = new IntersectionObserver((es) => es.forEach((e) => { if (!e.isIntersecting) return; links.forEach((l) => { const on = l.hash === '#' + e.target.id; l.toggleAttribute('aria-current', on); if (on) { l.setAttribute('aria-current', 'true'); const ul = l.closest('ul')!; ul.scrollTo({ left: l.offsetLeft - ul.clientWidth / 2 + l.clientWidth / 2, behavior: 'smooth' }); } }); }), { rootMargin: '-35% 0px -60% 0px' });
+      document.querySelectorAll('section.ind').forEach((sec) => io.observe(sec));
+    }
+  </script>
 </Base>
 <style>
-  .ind-nav{display:flex;flex-wrap:wrap;gap:8px}
+  .ind-bar{position:sticky;top:var(--header-h);z-index:20;background:rgba(246,244,238,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--rule)}
+  .ind-nav{display:flex;gap:8px;overflow-x:auto;padding-block:10px;scrollbar-width:none}
+  .ind-nav::-webkit-scrollbar{display:none}
+  .ind-nav li{flex:none}
+  .ind-nav a[aria-current="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .ind{scroll-margin-top:calc(var(--header-h) + 70px)}
   .ind-nav a{display:inline-flex;align-items:center;min-height:44px;padding:6px 14px;border:1.5px solid var(--rule-strong);border-radius:999px;text-decoration:none;color:var(--ink);font-weight:500;background:#fff}
   .ind-nav a:hover{border-color:var(--ink);background:var(--citron)}
   .ind-pic,.ind-copy{grid-column:1/-1}

@@ -1,0 +1,13 @@
+---
+// Ambient background footage. The poster renders first; the muted loop streams only while on
+// screen, never on reduced motion or data saver, and the visitor can pause it at any time.
+import Pic from './Pic.astro';
+interface Props { name: string; alt?: string; class?: string; priority?: boolean; sizes?: string; label?: string }
+const { name, alt = '', class: cls, priority = false, sizes = '100vw', label = 'background video' } = Astro.props;
+---
+<div class:list={['loopv', cls]} data-loop={name}>
+  <Pic name={`loop-${name}`} alt={alt} priority={priority} sizes={sizes} widths={[640, 1024, 1600]} quality={58} />
+  <video muted playsinline loop preload="none" disablepictureinpicture aria-hidden="true" tabindex="-1" data-src={`/media/loops/${name}`}></video>
+  <span class="loopv-shade" aria-hidden="true"></span>
+  <button class="loopv-btn" type="button" data-loop-toggle aria-pressed="false" aria-label={`Pause ${label}`}><span class="lv-ic" aria-hidden="true"></span></button>
+</div>

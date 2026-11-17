@@ -1,0 +1,23 @@
+---
+// Two counter-moving bands driven by scrolling: service words above, Skylark vehicles below.
+import Cut from './Cut.astro';
+interface Props { words?: string[]; cuts?: string[] }
+const { words = ['Road', 'Rail', 'Air', 'Warehousing', 'Project cargo', 'Packaging'], cuts = ['truck', 'train', 'plane', 'forklift', 'lowloader', 'crate', 'van', 'uld'] } = Astro.props;
+---
+<section class="ticker" aria-hidden="true">
+  <div class="tk-row" data-marquee="0.55"><div class="mq-track">{[0, 1].map(() => words.map((w, i) => <span class:list={['tk-w', { solid: i % 2 === 0 }]} data-text={w}></span>))}</div></div>
+  <div class="tk-row tk-objs" data-marquee="-0.38"><div class="mq-track">{[0, 1].map(() => cuts.map((c) => <span class:list={['tk-o', `tk-${c}`]}><Cut name={c} sizes="30vw" widths={[300, 600]} /></span>))}</div></div>
+</section>
+<style>
+  .ticker{background:var(--paper);overflow:hidden;padding-block:clamp(24px,4vw,56px);border-block:1px solid var(--rule)}
+  .tk-row{overflow:hidden}
+  .tk-w::before{content:attr(data-text);display:block;padding-right:.45em;font:700 clamp(3.25rem,1.6rem + 7.5vw,9.5rem)/.95 var(--display);text-transform:uppercase;white-space:nowrap;color:transparent;-webkit-text-stroke:1.5px rgba(16,37,50,.4)}
+  .tk-w.solid::before{color:var(--ink);-webkit-text-stroke:0}
+  .tk-w:nth-child(3n)::before{color:var(--link)}
+  .tk-objs{margin-top:clamp(8px,2vw,24px)}
+  .tk-objs :global(.mq-track){align-items:flex-end;gap:clamp(28px,5vw,80px);padding-right:clamp(28px,5vw,80px)}
+  .tk-o{display:block;height:clamp(64px,9vw,140px)}
+  .tk-o :global(picture),.tk-o :global(img){height:100%;width:auto;display:block}
+  .tk-train{height:clamp(40px,5.5vw,84px)}
+  .tk-plane{height:clamp(52px,7vw,104px);align-self:center}
+</style>

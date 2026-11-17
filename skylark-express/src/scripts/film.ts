@@ -18,9 +18,9 @@ if (dlg) {
     mute.textContent = v.muted ? 'Sound off' : 'Sound on'; mute.setAttribute('aria-pressed', String(!v.muted));
   };
   const open = (el: HTMLElement) => {
-    opener = el; dlg.showModal();
+    opener = el; dlg.showModal(); const sound = el.hasAttribute('data-film-sound');
     if (!v.querySelector('track')) { const t = document.createElement('track'); t.kind = 'captions'; t.srclang = 'en'; t.label = 'English'; t.src = '/media/the-handover.en.vtt'; t.default = true; v.append(t); } // captions are fetched with the film, not before
-    v.muted = true; v.src = pick(); v.load(); v.play().catch(() => {}); sync(); toggle.focus();
+    v.muted = !sound; v.src = pick(); v.load(); v.play().catch(() => { v.muted = true; v.play().catch(() => {}); }); sync(); toggle.focus();
   };
   const close = () => { v.pause(); v.removeAttribute('src'); v.load(); seek.value = '0'; time.textContent = '0:00 / 0:42'; opener?.focus(); };
   document.querySelectorAll<HTMLElement>('[data-film-open]').forEach((b) => b.addEventListener('click', () => open(b)));
