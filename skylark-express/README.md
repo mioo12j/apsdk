@@ -64,7 +64,7 @@ Each tool is configured independently in `src/config/integrations.ts` from `PUBL
 - `hero-dispatch-1080p.mp4` / `-720p.mp4` / `-4x5.mp4`: the silent six-second truck take (film 00:15–00:21). The desktop poster is its exact first frame.
 - `journey-scrub-landscape.mp4` / `-portrait.mp4`: short-GOP clips that the pinned Home sequence scrubs with scroll.
 - Shots were generated with Higgsfield (stills: Nano Banana Pro with the supplied logo as reference; motion: Seedance 2.5 / 2.0 from those stills). The logo was applied to the stills before animation rather than motion-tracked in post; every shot was checked at first, middle and last frame. Landscape shots other than the hero take are 720p sources upscaled to 1080p.
-- Trains and aircraft are shown unbranded; Skylark branding is on shipment materials, vehicles, signage and clothing. The film is labelled an illustrative shipment journey.
+- At the client's request every vehicle carries the Skylark mark, including the aircraft (Skylark cargo livery) and the train. Skylark coordinates air and rail capacity with carriers, so the film stays labelled an illustrative shipment journey. The earlier unbranded air clips are kept in `media-src/clips-unbranded/` should neutral carrier livery be preferred.
 
 ## Lab performance (preview server, Chromium)
 

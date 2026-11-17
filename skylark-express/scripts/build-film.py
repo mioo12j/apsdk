@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Assembles "The handover" (42 s, 24 fps) in 16:9 and 9:16, the six-second hero cut, the
-journey scrub clip, posters and audio from the generated shots in media-src/clips and the
+posters and audio from the generated shots in media-src/clips and the
 editable graphics in media-src/work/ov.   Usage: python3 scripts/build-film.py"""
 import subprocess, os, wave, sys
 import numpy as np
@@ -114,12 +114,5 @@ run(['ffmpeg', '-v', 'error', '-y', '-ss', '41', '-i', L, '-frames:v', '1', '-q:
 run(['ffmpeg', '-v', 'error', '-y', '-ss', '41', '-i', Pm, '-frames:v', '1', '-q:v', '2', f'{ROOT}/src/assets/img/film-end-portrait.jpg'])
 run(['ffmpeg', '-v', 'error', '-y', '-ss', '16.5', '-i', L, '-frames:v', '1', '-q:v', '2', f'{ROOT}/src/assets/img/film-poster.jpg'])
 run(['ffmpeg', '-v', 'error', '-y', '-ss', '16.5', '-i', Pm, '-frames:v', '1', '-q:v', '2', f'{ROOT}/src/assets/img/film-poster-portrait.jpg'])
-# journey scrub clip for the pinned home sequence: every frame a keyframe so scroll can seek freely
-J = [('01', 0.4, 2.5), ('04', 0.0, 2.5), ('06', 1.0, 3.0), ('10', 0.2, 2.5)]
-js = []
-for i, (c, ss, d) in enumerate(J):
-    o = f'{W}/j{i}.mp4'; js.append(o)
-    run(['ffmpeg', '-v', 'error', '-y', '-ss', str(ss), '-t', str(d), '-i', f'{C}/c{c}.mp4', '-vf', 'fps=12,scale=960:540:flags=lanczos,format=yuv420p', '-an', '-c:v', 'libx264', '-crf', '14', o])
-with open(f'{W}/j_list.txt', 'w') as f: f.write(''.join(f"file '{s}'\n" for s in js))
-run(['ffmpeg', '-v', 'error', '-y', '-f', 'concat', '-safe', '0', '-i', f'{W}/j_list.txt', '-c:v', 'libx264', '-preset', 'slow', '-crf', '27', '-g', '1', '-keyint_min', '1', '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-movflags', '+faststart', '-an', f'{OUT}/journey-scrub.mp4'])
+# (scroll-scrubbed journey clips are built by scripts/build-scrub.py)
 print('film built')
